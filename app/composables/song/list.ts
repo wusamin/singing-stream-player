@@ -19,7 +19,7 @@ interface Option {
   channelId: string
 }
 
-export const useSongs = async () => {
+export const useSongs = async (option?: Partial<Option>) => {
   const { data } = useFetch<{
     data: Song[]
   }>('/api/songs')
@@ -30,8 +30,9 @@ export const useSongs = async () => {
 }
 
 export const usePlayer = (songs: Song[]) => {
-  const { video, play, load, stop } = useYoutube()
+  const { video, play, load, stop, setOnStateChange } = useYoutube()
 
+  // 次の曲に飛ぶ処理をこれで無理やり実行する
   const timeoutId = ref<number | undefined>(undefined)
   const nowPlaying = ref<Song | null>(null)
   const playingTime = computed(() => {
@@ -48,8 +49,28 @@ export const usePlayer = (songs: Song[]) => {
     }
   })
 
+  // プレーヤーが止まった時に次の曲に飛ぶための処理を再実行させたいので、refで処理自体を保持する
+  const timeoutHandler = ref<(() => void) | null>(null)
+
+  setOnStateChange((event) => {
+    // ポーズした時は時間がずれるのでクリアする
+    if (event.data === YT.PlayerState.PAUSED) {
+      console.log(event.target.getCurrentTime())
+      clearTimeout(timeoutId.value)
+      return
+    }
+
+    if (event.data === YT.PlayerState.PLAYING) {
+      // handlerの時間を変えて入れ直す
+      console.log(event.target.getCurrentTime())
+    }
+
+    console.log('on usePlayer')
+  })
+
   const start = (startIndex?: number) => {
     clearTimeout(timeoutId.value)
+    timeoutHandler.value = null
     // 指定がない場合は0からスタート
     const index = startIndex ?? 0
 
@@ -67,18 +88,23 @@ export const usePlayer = (songs: Song[]) => {
 
     nowPlaying.value = song
 
-    if (window) {
-      timeoutId.value = window.setTimeout(
-        () => {
-          if (songs.length - 1 === index) {
-            stop()
-            return
-          }
-          start(index + 1)
-        },
-        (song.endAt - song.startAt) * 10,
-      )
+    if (!window) {
+      return
     }
+
+    const handler = () => {
+      if (songs.length - 1 === index) {
+        stop()
+        return
+      }
+      start(index + 1)
+    }
+    timeoutHandler.value = handler
+
+    timeoutId.value = window.setTimeout(
+      handler,
+      (song.endAt - song.startAt) * 1000,
+    )
   }
 
   return {
