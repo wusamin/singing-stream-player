@@ -50,6 +50,21 @@ export default defineEventHandler<Response>((event) => {
         startAt: 3501,
         endAt: 3769,
       },
+      {
+        id: '3',
+        video: {
+          id: '1q-2JhRKoLU',
+          title:
+            '【歌枠】デビュー３か月記念♪最近お歌が上手になってきた気がします…!!!【兎ノ花ののち/Varium】',
+          publishedAt: new Date('2025-7-10T09:00:00Z'),
+        },
+        meta: {
+          title: '天体観測',
+          artist: 'BUMP OF CHICKEN',
+        },
+        startAt: 2699,
+        endAt: 2952,
+      },
     ],
   }
 })
