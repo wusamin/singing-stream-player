@@ -1,10 +1,18 @@
-import { pgTable, uuid, timestamp, integer, text } from 'drizzle-orm/pg-core'
+import {
+  pgTable,
+  uuid,
+  timestamp,
+  integer,
+  text,
+  serial,
+} from 'drizzle-orm/pg-core'
+import { relations } from 'drizzle-orm'
 
-export const song = pgTable('song', {
-  id: uuid('id').primaryKey(),
-  videoMetaId: uuid('video_meta_id')
+export const songs = pgTable('songs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  videoMetaId: integer('video_meta_id')
     .notNull()
-    .references(() => videoMeta.id),
+    .references(() => videoMetas.id),
   metaTitle: text('meta_title'),
   metaArtist: text('meta_artist'),
   startAt: integer('start_at'),
@@ -13,8 +21,15 @@ export const song = pgTable('song', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
-export const videoMeta = pgTable('video_meta', {
-  id: uuid('id').primaryKey(),
+export const songsRelations = relations(songs, ({ one }) => ({
+  videoMeta: one(videoMetas, {
+    fields: [songs.videoMetaId],
+    references: [videoMetas.id],
+  }),
+}))
+
+export const videoMetas = pgTable('video_metas', {
+  id: serial('id').primaryKey(),
   videoId: text('video_id').notNull(),
   channelId: text('channel_id').notNull(),
   title: text('title').notNull(),
