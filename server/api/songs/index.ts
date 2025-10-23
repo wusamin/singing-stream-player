@@ -1,3 +1,4 @@
+import type { Song } from '../../domain'
 import { listSongs } from '../../domain'
 
 interface Response {

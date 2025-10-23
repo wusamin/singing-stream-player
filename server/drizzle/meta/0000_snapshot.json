@@ -66,12 +66,8 @@
           "name": "songs_video_meta_id_video_metas_id_fk",
           "tableFrom": "songs",
           "tableTo": "video_metas",
-          "columnsFrom": [
-            "video_meta_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["video_meta_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }

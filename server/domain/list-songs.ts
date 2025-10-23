@@ -1,6 +1,6 @@
 import { db } from '../db'
 
-interface Song {
+export interface Song {
   id: string
   video: {
     id: string
@@ -25,8 +25,6 @@ export const listSongs = async (): Promise<Result> => {
       videoMeta: true,
     },
   })
-
-  console.log(JSON.stringify(songs, null, 2))
 
   return {
     data: songs.map(
