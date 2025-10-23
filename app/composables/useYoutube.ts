@@ -20,13 +20,13 @@ export const useYoutube = () => {
         const PlayerConstructor = YouTube.Player as unknown as typeof YT.Player
         if (PlayerConstructor) {
           player.value = new PlayerConstructor(video.value!, {
-            videoId: 'd_IFKP1Ofq0',
+            // videoId: 'd_IFKP1Ofq0',
           })
         }
       }, 100)
     }
     player.value = new PlayerConstructor(video.value!, {
-      videoId: 'd_IFKP1Ofq0',
+      // videoId: 'd_IFKP1Ofq0',
     })
   })
 
@@ -36,5 +36,7 @@ export const useYoutube = () => {
     player.value?.loadVideoById(videoId || 'VVKOdLHWal4', startSeconds ?? 0)
   }
 
-  return { video, play, load }
+  const stop = () => player.value?.stopVideo()
+
+  return { video, play, stop, load }
 }

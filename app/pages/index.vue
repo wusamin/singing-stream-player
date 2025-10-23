@@ -1,30 +1,29 @@
 <script setup lang="ts">
 import { usePlayer, useSongs } from '../composables/song'
-
-const { video, play, load } = useYoutube()
-const { songs } = useSongs()
-const { start } = usePlayer(songs, load)
+const { songs } = await useSongs()
+const { start, nowPlaying, video, playingTime } = usePlayer(songs)
 </script>
 
 <template>
   <div class="w-full bg-[#ffd8dd] h-[40px]"></div>
-  <div class="mt-4">
-    <button
-      @click="
-        () => {
-          start(0)
-        }
-      "
-    >
-      Start Player
-    </button>
+  <div v-if="nowPlaying">
+    <div>
+      Now Playing:
+      {{ nowPlaying.meta.title + ' - ' + nowPlaying.meta.artist }}
+    </div>
+    <div>{{ playingTime?.totalTime }}</div>
   </div>
-  <div ref="video" class="mt-4" />
   <div class="mt-4">
-    <div v-for="song in songs">
-      <div>{{ song.meta.title }} - {{ song.meta.artist }}</div>
-      <div>
-        <button>Play</button>
+    <button @click="() => start()">Start Player</button>
+  </div>
+  <div class="flex mt-4">
+    <div ref="video" />
+    <div>
+      <div v-for="(song, index) in songs">
+        <div>{{ song.meta.title }} - {{ song.meta.artist }}</div>
+        <div>
+          <button @click="() => start(index)">Play</button>
+        </div>
       </div>
     </div>
   </div>
