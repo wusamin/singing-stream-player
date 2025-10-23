@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { usePlayer, useSongs } from '../composables/song'
+import { usePlayer, useSongs } from '@/composables/song'
 const { songs } = await useSongs()
 const { start, nowPlaying, video, playingTime } = usePlayer(songs)
 </script>

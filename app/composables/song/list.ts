@@ -67,16 +67,18 @@ export const usePlayer = (songs: Song[]) => {
 
     nowPlaying.value = song
 
-    timeoutId.value = setTimeout(
-      () => {
-        if (songs.length - 1 === index) {
-          stop()
-          return
-        }
-        start(index + 1)
-      },
-      (song.endAt - song.startAt) * 10,
-    )
+    if (window) {
+      timeoutId.value = window.setTimeout(
+        () => {
+          if (songs.length - 1 === index) {
+            stop()
+            return
+          }
+          start(index + 1)
+        },
+        (song.endAt - song.startAt) * 10,
+      )
+    }
   }
 
   return {
