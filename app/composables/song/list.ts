@@ -20,12 +20,13 @@ interface Option {
 }
 
 export const useSongs = async (option?: Partial<Option>) => {
-  const { data } = useFetch<{
+  const { data, status } = useFetch<{
     data: Song[]
   }>('/api/songs')
 
   return {
     songs: data.value?.data ?? [],
+    status,
   }
 }
 
@@ -55,17 +56,28 @@ export const usePlayer = (songs: Song[]) => {
   setOnStateChange((event) => {
     // ポーズした時は時間がずれるのでクリアする
     if (event.data === YT.PlayerState.PAUSED) {
-      console.log(event.target.getCurrentTime())
       clearTimeout(timeoutId.value)
       return
     }
 
     if (event.data === YT.PlayerState.PLAYING) {
-      // handlerの時間を変えて入れ直す
-      console.log(event.target.getCurrentTime())
-    }
+      if (nowPlaying.value === null) {
+        return
+      }
 
-    console.log('on usePlayer')
+      clearTimeout(timeoutId.value)
+      const currentTime = event.target.getCurrentTime()
+
+      if (
+        currentTime <= nowPlaying.value.endAt &&
+        timeoutHandler.value !== null
+      ) {
+        timeoutId.value = window.setTimeout(
+          timeoutHandler.value,
+          (nowPlaying.value.endAt - currentTime) * 1000,
+        )
+      }
+    }
   })
 
   const start = (startIndex?: number) => {
