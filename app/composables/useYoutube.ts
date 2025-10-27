@@ -1,9 +1,15 @@
-export const useYoutube = () => {
+interface Option {
+  initialVideoId: string
+}
+
+export const useYoutube = (option?: Partial<Option>) => {
   const video = ref<HTMLElement>()
   const { onLoaded } = useScriptYouTubePlayer({})
 
   const player = ref<YT.Player | null>(null)
-  const onStateChangeCallback = ref<((event: YT.OnStateChangeEvent) => void) | null>(null)
+  const onStateChangeCallback = ref<
+    ((event: YT.OnStateChangeEvent) => void) | null
+  >(null)
 
   onLoaded(async (instance) => {
     // なんかタイムアウトを入れるとうまくいくが、実際に何がどうなってるかはよくわからない
@@ -12,7 +18,9 @@ export const useYoutube = () => {
 
       const PlayerConstructor = YouTube.Player as unknown as typeof YT.Player
       if (PlayerConstructor) {
-        const p = new PlayerConstructor(video.value!)
+        const p = new PlayerConstructor(video.value!, {
+          videoId: option?.initialVideoId,
+        })
         p.addEventListener('onStateChange', (event) => {
           // コールバックが設定されていれば呼び出す
           if (onStateChangeCallback.value) {
@@ -30,12 +38,23 @@ export const useYoutube = () => {
     player.value?.loadVideoById(videoId, startSeconds ?? 0)
   }
 
-  const stop = () => player.value?.stopVideo()
+  const pause = () => {
+    if (player.value?.getPlayerState() === YT.PlayerState.PAUSED) {
+      player.value?.playVideo()
+      return
+    }
+    if (player.value?.getPlayerState() === YT.PlayerState.PLAYING) {
+      player.value?.pauseVideo()
+      return
+    }
+  }
 
   // コールバックを設定するメソッド
-  const setOnStateChange = (callback: (event: YT.OnStateChangeEvent) => void) => {
+  const setOnStateChange = (
+    callback: (event: YT.OnStateChangeEvent) => void,
+  ) => {
     onStateChangeCallback.value = callback
   }
 
-  return { video, play, stop, load, setOnStateChange }
+  return { video, play, pause, load, setOnStateChange }
 }

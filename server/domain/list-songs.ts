@@ -1,6 +1,8 @@
+import { asc, eq, inArray } from 'drizzle-orm'
 import { db } from '../db'
+import { songs, videoMetas } from '../db/schema'
 
-export interface Song {
+export type Song = {
   id: string
   video: {
     id: string
@@ -19,29 +21,38 @@ interface Result {
   data: Song[]
 }
 
-export const listSongs = async (): Promise<Result> => {
-  const songs = await db.query.songs.findMany({
-    with: {
-      videoMeta: true,
-    },
-  })
+interface Input {
+  channelIds?: string[]
+}
+
+export const listSongs = async (input: Input): Promise<Result> => {
+  const result = await db
+    .select()
+    .from(songs)
+    .innerJoin(videoMetas, eq(songs.videoMetaId, videoMetas.id))
+    .where(
+      input.channelIds
+        ? inArray(videoMetas.channelId, input.channelIds)
+        : undefined,
+    )
+    .orderBy(asc(videoMetas.publishedAt), asc(songs.startAt))
 
   return {
-    data: songs.map(
-      (song) =>
+    data: result.map(
+      (row) =>
         ({
-          id: song.id,
+          id: row.songs.id,
           video: {
-            id: String(song.videoMeta.videoId),
-            title: String(song.videoMeta.title),
-            publishedAt: song.videoMeta.publishedAt,
+            id: String(row.video_metas.videoId),
+            title: String(row.video_metas.title),
+            publishedAt: row.video_metas.publishedAt,
           },
           meta: {
-            title: String(song.metaTitle),
-            artist: String(song.metaArtist),
+            title: String(row.songs.metaTitle),
+            artist: String(row.songs.metaArtist),
           },
-          startAt: song.startAt ?? 0,
-          endAt: song.endAt ?? 0,
+          startAt: row.songs.startAt ?? 0,
+          endAt: row.songs.endAt ?? 0,
         }) satisfies Song,
     ),
   }

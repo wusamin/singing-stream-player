@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import * as R from 'remeda'
 import { useYoutube } from '~/composables/useYoutube'
 
 export interface Song {
@@ -33,47 +34,54 @@ interface Response {
 }
 
 interface Option {
-  channelId: string
+  channelIds?: string[]
 }
 
-export const useSongs = async (option?: Partial<Option>) => {
+export const useSongs = async () => {
+  const searchCondition = ref<Option>({})
+
   const { data, status } = useFetch<{
     data: Response[]
-  }>('/api/songs')
+  }>('/api/songs', {
+    query: searchCondition.value,
+  })
 
   return {
-    songs:
-      data.value?.data.map(
+    songs: R.pipe(
+      data.value?.data ?? [],
+      R.map(
         (i): Song => ({
           ...i,
           video: {
             ...i.video,
             publishedAt: dayjs(i.video.publishedAt),
           },
-          duration: (() => {
+          duration: ((): string => {
             const d = i.endAt - i.startAt
             const seconds = d % 60
             const paddedSeconds = String(seconds).padStart(2, '0')
             return `${Math.floor(d / 60)}:${paddedSeconds}`
           })(),
         }),
-      ) ?? [],
+      ),
+    ),
     status,
+    searchCondition,
   }
 }
 
-const usePlayingText = () => {
+const usePlayingTime = () => {
   const intervalId = ref<number | undefined>(undefined)
-  const playTime = ref<number>(0)
+  const elapsedSeconds = ref<number>(0)
   const playingTimeText = ref<string>('0:00')
   const updatePlayingTime = () => {
-    playTime.value += 1
-    playingTimeText.value = `${Math.floor(playTime.value / 60)}:${String(
-      playTime.value % 60,
+    elapsedSeconds.value += 1
+    playingTimeText.value = `${Math.floor(elapsedSeconds.value / 60)}:${String(
+      elapsedSeconds.value % 60,
     ).padStart(2, '0')}`
   }
   const clear = () => {
-    playTime.value = 0
+    elapsedSeconds.value = 0
     playingTimeText.value = '0:00'
     stop()
     intervalId.value = undefined
@@ -86,7 +94,7 @@ const usePlayingText = () => {
   const stop = () => clearInterval(intervalId.value)
 
   const setPlayingTime = (time: number) => {
-    playTime.value = time
+    elapsedSeconds.value = time
   }
 
   return {
@@ -95,20 +103,24 @@ const usePlayingText = () => {
     start,
     stop,
     setPlayingTime,
+    elapsedSeconds,
   }
 }
 
 export const usePlayer = (songs: Song[]) => {
-  const { video, play, load, stop, setOnStateChange } = useYoutube()
+  const { video, play, load, pause, setOnStateChange } = useYoutube({
+    initialVideoId: songs[0]?.video.id,
+  })
   const {
     playingTimeText,
     start: startPlayingText,
     stop: stopPlayingText,
+    clear: clearPlayingText,
     setPlayingTime,
-  } = usePlayingText()
+    elapsedSeconds,
+  } = usePlayingTime()
   // 次の曲に飛ぶ処理をこれで無理やり実行する
   const timeoutId = ref<number | undefined>(undefined)
-  const intervalId = ref<number | undefined>(undefined)
   const nowPlaying = ref<Song | null>(null)
   const playingTime = computed(() => {
     if (!nowPlaying.value) {
@@ -158,9 +170,50 @@ export const usePlayer = (songs: Song[]) => {
     }
   })
 
+  const next = () => {
+    if (!nowPlaying.value) {
+      return
+    }
+    const currentIndex = songs.findIndex(
+      (song) => song.id === nowPlaying.value?.id,
+    )
+    const nextIndex = currentIndex + 1
+
+    if (nextIndex < songs.length) {
+      start(nextIndex)
+    } else {
+      stop()
+      clearPlayingText()
+    }
+  }
+
+  const prev = () => {
+    if (!nowPlaying.value) {
+      return
+    }
+
+    const currentIndex = songs.findIndex(
+      (song) => song.id === nowPlaying.value?.id,
+    )
+
+    if (3 < elapsedSeconds.value) {
+      start(currentIndex)
+      return
+    }
+
+    const prevIndex = currentIndex - 1
+
+    if (0 <= prevIndex) {
+      start(prevIndex)
+    } else {
+      stop()
+      clearPlayingText()
+    }
+  }
+
   const start = (startIndex?: number) => {
     clearTimeout(timeoutId.value)
-    clearInterval(intervalId.value)
+    clearPlayingText()
     timeoutHandler.value = null
     // 指定がない場合は0からスタート
     const index = startIndex ?? 0
@@ -172,6 +225,7 @@ export const usePlayer = (songs: Song[]) => {
     const song = songs[index]
 
     if (!song) {
+      console.error('song is undefined')
       return
     }
 
@@ -200,6 +254,9 @@ export const usePlayer = (songs: Song[]) => {
 
   return {
     start,
+    next,
+    prev,
+    pause,
     nowPlaying,
     video,
     playingTime,

@@ -5,55 +5,14 @@ interface Response {
   data: Song[]
 }
 
-export default defineEventHandler(
-  async (event): Promise<Response> => await listSongs(),
-  // return {
-  //   data: [
-  //     {
-  //       id: '1',
-  //       video: {
-  //         id: 'nP6XESdY_Xk',
-  //         title:
-  //           '【お料理配信】花火大会の人気メニュー！？はしまき作ります【兎ノ花ののち/Varium】',
-  //         publishedAt: new Date('2025-09-05T09:00:00Z'),
-  //       },
-  //       meta: {
-  //         title: '打上花火',
-  //         artist: 'DAOKO×米津玄師',
-  //       },
-  //       startAt: 3501,
-  //       endAt: 3769,
-  //     },
-  //     {
-  //       id: '2',
-  //       video: {
-  //         id: 'aS6UJoXrjsY',
-  //         title:
-  //           '【感謝】誕生日と半年記念ありがとうございます…！！【兎ノ花ののち/Varium】',
-  //         publishedAt: new Date('2025-10-10T09:00:00Z'),
-  //       },
-  //       meta: {
-  //         title: '栄光の架橋',
-  //         artist: 'ゆず',
-  //       },
-  //       startAt: 3501,
-  //       endAt: 3769,
-  //     },
-  //     {
-  //       id: '3',
-  //       video: {
-  //         id: '1q-2JhRKoLU',
-  //         title:
-  //           '【歌枠】デビュー３か月記念♪最近お歌が上手になってきた気がします…!!!【兎ノ花ののち/Varium】',
-  //         publishedAt: new Date('2025-7-10T09:00:00Z'),
-  //       },
-  //       meta: {
-  //         title: '天体観測',
-  //         artist: 'BUMP OF CHICKEN',
-  //       },
-  //       startAt: 2699,
-  //       endAt: 2952,
-  //     },
-  //   ],
-  // }
-)
+interface Input {
+  channelIds?: string[]
+}
+
+export default defineEventHandler(async (event): Promise<Response> => {
+  if (event.method !== 'GET') {
+    throw createError({ statusCode: 405, statusMessage: 'Method Not Allowed' })
+  }
+
+  return await listSongs(getQuery<Input>(event))
+})
