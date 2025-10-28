@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { usePlayer, useSongs } from '@/composables/song'
+import { usePlayer, useSongs } from '@/composables'
 
 const { songs, status, channels, searchCondition } = await useSongs()
 const {
@@ -14,9 +14,6 @@ const {
   playerState,
   setPlaylist,
 } = usePlayer(songs.value)
-// watch(songs, () => {
-//   setPlaylist(songs.value, false)
-// })
 </script>
 
 <template>
