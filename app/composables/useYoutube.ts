@@ -2,6 +2,15 @@ interface Option {
   initialVideoId: string
 }
 
+type PlayerState =
+  | 'UNSTARTED'
+  | 'ENDED'
+  | 'PLAYING'
+  | 'PAUSED'
+  | 'BUFFERING'
+  | 'CUED'
+  | 'UNKNOWN'
+
 export const useYoutube = (option?: Partial<Option>) => {
   const video = ref<HTMLElement>()
   const { onLoaded } = useScriptYouTubePlayer({})
@@ -11,6 +20,12 @@ export const useYoutube = (option?: Partial<Option>) => {
     ((event: YT.OnStateChangeEvent) => void) | null
   >(null)
 
+  // プレイヤーの初期化完了を追跡するPromise
+  let playerReadyResolve: (() => void) | null = null
+  const playerReady = new Promise<void>((resolve) => {
+    playerReadyResolve = resolve
+  })
+
   onLoaded(async (instance) => {
     // なんかタイムアウトを入れるとうまくいくが、実際に何がどうなってるかはよくわからない
     setTimeout(async () => {
@@ -19,26 +34,50 @@ export const useYoutube = (option?: Partial<Option>) => {
       const PlayerConstructor = YouTube.Player as unknown as typeof YT.Player
       if (PlayerConstructor) {
         const p = new PlayerConstructor(video.value!, {
-          videoId: option?.initialVideoId,
+          videoId: option?.initialVideoId || undefined,
+          playerVars: {
+            fs: 0,
+            iv_load_policy: 3,
+            // controls: 0,
+          },
         })
+        // p.seekTo(12000, true)
         p.addEventListener('onStateChange', (event) => {
+          setState()
           // コールバックが設定されていれば呼び出す
           if (onStateChangeCallback.value) {
             onStateChangeCallback.value(event)
           }
         })
         player.value = p
+        // プレイヤーの初期化完了を通知
+        setTimeout(() => {
+          playerReadyResolve?.()
+        }, 100)
       }
     }, 100)
   })
 
-  const play = () => player.value?.playVideo()
+  const play = async () => {
+    await playerReady
+    player.value?.playVideo()
+  }
 
-  const load = (videoId: string, startSeconds: number | null) => {
+  const load = async (videoId: string, startSeconds: number | null) => {
+    await playerReady
     player.value?.loadVideoById(videoId, startSeconds ?? 0)
   }
 
-  const pause = () => {
+  const loadByUrl = async (url: string, startSeconds: number | null) => {
+    await playerReady
+    console.log(player.value)
+    console.log('url:', url)
+    player.value?.loadVideoByUrl(url, startSeconds ?? 0)
+  }
+
+  const pause = async () => {
+    await playerReady
+    console.log(player.value?.getPlayerState())
     if (player.value?.getPlayerState() === YT.PlayerState.PAUSED) {
       player.value?.playVideo()
       return
@@ -46,6 +85,39 @@ export const useYoutube = (option?: Partial<Option>) => {
     if (player.value?.getPlayerState() === YT.PlayerState.PLAYING) {
       player.value?.pauseVideo()
       return
+    }
+    if (player.value?.getPlayerState() === YT.PlayerState.CUED) {
+      player.value?.playVideo()
+    }
+  }
+
+  const state = ref<PlayerState>('UNSTARTED')
+
+  const setState = () => {
+    const playerState = player.value?.getPlayerState()
+
+    switch (playerState) {
+      case YT.PlayerState.UNSTARTED:
+        state.value = 'UNSTARTED'
+        return
+      case YT.PlayerState.ENDED:
+        state.value = 'ENDED'
+        return
+      case YT.PlayerState.PLAYING:
+        state.value = 'PLAYING'
+        return
+      case YT.PlayerState.PAUSED:
+        state.value = 'PAUSED'
+        return
+      case YT.PlayerState.BUFFERING:
+        state.value = 'BUFFERING'
+        return
+      case YT.PlayerState.CUED:
+        state.value = 'CUED'
+        return
+      default:
+        state.value = 'UNKNOWN'
+        return
     }
   }
 
@@ -56,5 +128,5 @@ export const useYoutube = (option?: Partial<Option>) => {
     onStateChangeCallback.value = callback
   }
 
-  return { video, play, pause, load, setOnStateChange }
+  return { video, play, pause, load, loadByUrl, setOnStateChange, state }
 }

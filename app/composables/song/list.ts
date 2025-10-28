@@ -50,31 +50,38 @@ export const useSongs = async () => {
   const searchCondition = ref<Option>({})
 
   const { data, status } = useFetch<Response>('/api/songs', {
-    query: searchCondition.value,
+    query: computed(() => ({
+      ...searchCondition.value,
+      channelIds: searchCondition.value?.channelIds
+        ? [searchCondition.value.channelIds].join(',')
+        : undefined,
+    })),
   })
 
   return {
-    songs: R.pipe(
-      data.value?.data ?? [],
-      R.map(
-        (i): Song => ({
-          ...i,
-          video: {
-            ...i.video,
-            publishedAt: dayjs(i.video.publishedAt),
-          },
-          duration: ((): string => {
-            const d = i.endAt - i.startAt
-            const seconds = d % 60
-            const paddedSeconds = String(seconds).padStart(2, '0')
-            return `${Math.floor(d / 60)}:${paddedSeconds}`
-          })(),
-        }),
+    songs: computed((): Song[] =>
+      R.pipe(
+        data.value?.data ?? [],
+        R.map(
+          (i): Song => ({
+            ...i,
+            video: {
+              ...i.video,
+              publishedAt: dayjs(i.video.publishedAt),
+            },
+            duration: ((): string => {
+              const d = i.endAt - i.startAt
+              const seconds = d % 60
+              const paddedSeconds = String(seconds).padStart(2, '0')
+              return `${Math.floor(d / 60)}:${paddedSeconds}`
+            })(),
+          }),
+        ),
       ),
     ),
     status,
     searchCondition,
-    channels: data.value?.channels ?? [],
+    channels: computed(() => data.value?.channels ?? []),
   }
 }
 
@@ -116,9 +123,29 @@ const usePlayingTime = () => {
 }
 
 export const usePlayer = (songs: Song[]) => {
-  const { video, play, load, pause, setOnStateChange } = useYoutube({
-    initialVideoId: songs[0]?.video.id,
-  })
+  const { video, state, load, pause, setOnStateChange, loadByUrl } = useYoutube(
+    {
+      initialVideoId: songs[0]?.video.id,
+    },
+  )
+
+  const playlist = ref<Song[]>(songs)
+
+  const setPlaylist = async (_playlist: Song[], loadVideo: boolean) => {
+    playlist.value = _playlist
+    if (loadVideo) {
+      const v = _playlist[0]
+      if (!v) {
+        return
+      }
+      console.log(v.video.id)
+      await loadByUrl(
+        `http://www.youtube.com/v/${v.video.id}?version=3`,
+        v.startAt,
+      )
+    }
+  }
+
   const {
     playingTimeText,
     start: startPlayingText,
@@ -157,7 +184,18 @@ export const usePlayer = (songs: Song[]) => {
 
     if (event.data === YT.PlayerState.PLAYING) {
       if (nowPlaying.value === null) {
-        return
+        // 同じビデオは複数存在するが、nowPlayingがnullかつ、プレイリスト以外から再生する場合は1曲目が選ばれているはずなので、ここでは問題ない
+        const playingVideo = playlist.value.find(
+          (v) => v.video.id === event.target.getVideoData().video_id,
+        )
+        if (!playingVideo) {
+          console.error(
+            '再生された曲がプレイリスト内に存在しません',
+            event.target.getVideoData().video_id,
+          )
+          return
+        }
+        nowPlaying.value = playingVideo
       }
 
       clearTimeout(timeoutId.value)
@@ -182,7 +220,7 @@ export const usePlayer = (songs: Song[]) => {
     if (!nowPlaying.value) {
       return
     }
-    const currentIndex = songs.findIndex(
+    const currentIndex = playlist.value.findIndex(
       (song) => song.id === nowPlaying.value?.id,
     )
     const nextIndex = currentIndex + 1
@@ -229,9 +267,9 @@ export const usePlayer = (songs: Song[]) => {
     if (songs.length < index - 1) {
       return
     }
-
-    const song = songs[index]
-
+    console.log(JSON.stringify(playlist.value))
+    // const song = songs[index]
+    const song = playlist.value[index]
     if (!song) {
       console.error('song is undefined')
       return
@@ -269,5 +307,7 @@ export const usePlayer = (songs: Song[]) => {
     video,
     playingTime,
     playingTimeText,
+    playerState: state,
+    setPlaylist,
   }
 }

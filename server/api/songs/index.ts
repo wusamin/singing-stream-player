@@ -7,13 +7,16 @@ interface Response {
 }
 
 interface Input {
-  channelIds?: string[]
+  channelIds?: string
 }
 
 export default defineEventHandler(async (event): Promise<Response> => {
   if (event.method !== 'GET') {
     throw createError({ statusCode: 405, statusMessage: 'Method Not Allowed' })
   }
-
-  return await listSongs(getQuery<Input>(event))
+  const input = getQuery<Input>(event)
+  return await listSongs({
+    ...input,
+    channelIds: input?.channelIds?.split(','),
+  })
 })
