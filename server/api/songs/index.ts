@@ -1,8 +1,9 @@
-import type { Song } from '../../domain'
+import type {Channel, Song} from '../../domain'
 import { listSongs } from '../../domain'
 
 interface Response {
   data: Song[]
+  channels: Channel[]
 }
 
 interface Input {

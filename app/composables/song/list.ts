@@ -1,6 +1,5 @@
 import dayjs from 'dayjs'
 import * as R from 'remeda'
-import { useYoutube } from '~/composables/useYoutube'
 
 export interface Song {
   id: string
@@ -18,19 +17,29 @@ export interface Song {
   duration: string
 }
 
-interface Response {
-  id: string
-  video: {
+type Response = {
+  data: {
     id: string
-    title: string
-    publishedAt: string
-  }
-  meta: {
-    title: string
-    artist: string
-  }
-  startAt: number
-  endAt: number
+    video: {
+      id: string
+      title: string
+      publishedAt: string
+      channel: {
+        id: string
+        displayName: string
+      }
+    }
+    meta: {
+      title: string
+      artist: string
+    }
+    startAt: number
+    endAt: number
+  }[]
+  channels: {
+    id: string
+    displayName: string
+  }[]
 }
 
 interface Option {
@@ -40,9 +49,7 @@ interface Option {
 export const useSongs = async () => {
   const searchCondition = ref<Option>({})
 
-  const { data, status } = useFetch<{
-    data: Response[]
-  }>('/api/songs', {
+  const { data, status } = useFetch<Response>('/api/songs', {
     query: searchCondition.value,
   })
 
@@ -67,6 +74,7 @@ export const useSongs = async () => {
     ),
     status,
     searchCondition,
+    channels: data.value?.channels ?? [],
   }
 }
 

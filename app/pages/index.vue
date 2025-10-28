@@ -1,23 +1,29 @@
 <script setup lang="ts">
-import { usePlayer, useSongs } from '@/composables/song'
+  import { usePlayer, useSongs } from '@/composables/song'
 
-const { songs, status } = await useSongs()
-const {
-  start,
-  nowPlaying,
-  video,
-  playingTime,
-  playingTimeText,
-  next,
-  prev,
-  pause,
-} = usePlayer(songs)
+  const { songs, status, channels } = await useSongs()
+  const {
+    start,
+    nowPlaying,
+    video,
+    playingTime,
+    playingTimeText,
+    next,
+    prev,
+    pause,
+  } = usePlayer(songs)
 </script>
 
 <template>
   <div class="h-[calc(100vh-96px-12px)]">
     <div class="flex flex-col h-full">
-      <div class="w-full bg-[#ffd8dd] h-[40px]"></div>
+      <div class="w-full bg-[#ffd8dd] h-[40px]">
+        <select>
+          <option v-for="channel in channels" :key="channel.id" :value="channel.id">
+            {{ channel.displayName }}
+          </option>
+        </select>
+      </div>
       <div class="h-[60px]">
         <div v-if="nowPlaying">
           Now Playing:
