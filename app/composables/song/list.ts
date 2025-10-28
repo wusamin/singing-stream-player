@@ -292,20 +292,19 @@ export const usePlayer = (songs: Song[]) => {
     nowPlaying.value = song
 
     if (!window) {
-      return
+      throw new Error('window is undefined')
     }
 
-    const handler = () => {
+    timeoutHandler.value = () => {
       if (songs.length - 1 === index) {
         stop()
         return
       }
       start({ startIndex: index + 1 })
     }
-    timeoutHandler.value = handler
 
     timeoutId.value = window.setTimeout(
-      handler,
+      timeoutHandler.value,
       (song.endAt - song.startAt) * 1000,
     )
   }

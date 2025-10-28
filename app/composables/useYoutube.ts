@@ -20,12 +20,6 @@ export const useYoutube = (option?: Partial<Option>) => {
     ((event: YT.OnStateChangeEvent) => void) | null
   >(null)
 
-  // プレイヤーの初期化完了を追跡するPromise
-  let playerReadyResolve: (() => void) | null = null
-  const playerReady = new Promise<void>((resolve) => {
-    playerReadyResolve = resolve
-  })
-
   onLoaded(async (instance) => {
     // なんかタイムアウトを入れるとうまくいくが、実際に何がどうなってるかはよくわからない
     setTimeout(async () => {
@@ -50,34 +44,23 @@ export const useYoutube = (option?: Partial<Option>) => {
           }
         })
         player.value = p
-        // プレイヤーの初期化完了を通知
-        setTimeout(() => {
-          playerReadyResolve?.()
-        }, 100)
       }
     }, 100)
   })
 
-  const play = async () => {
-    await playerReady
+  const play = () => {
     player.value?.playVideo()
   }
 
-  const load = async (videoId: string, startSeconds: number | null) => {
-    await playerReady
+  const load = (videoId: string, startSeconds: number | null) => {
     player.value?.loadVideoById(videoId, startSeconds ?? 0)
   }
 
-  const loadByUrl = async (url: string, startSeconds: number | null) => {
-    await playerReady
-    console.log(player.value)
-    console.log('url:', url)
+  const loadByUrl = (url: string, startSeconds: number | null) => {
     player.value?.loadVideoByUrl(url, startSeconds ?? 0)
   }
 
   const pause = async () => {
-    await playerReady
-    console.log(player.value?.getPlayerState())
     if (player.value?.getPlayerState() === YT.PlayerState.PAUSED) {
       player.value?.playVideo()
       return
