@@ -14,9 +14,9 @@ const {
   playerState,
   setPlaylist,
 } = usePlayer(songs.value)
-watch(songs, () => {
-  setPlaylist(songs.value, false)
-})
+// watch(songs, () => {
+//   setPlaylist(songs.value, false)
+// })
 </script>
 
 <template>
@@ -82,7 +82,11 @@ watch(songs, () => {
                   class="border-b-2"
                 >
                   <td class="text-center align-middle px-2">
-                    <button @click="() => start(index)">
+                    <button
+                      @click="
+                        () => start({ startIndex: index, playlist: songs })
+                      "
+                    >
                       <Icon
                         name="material-symbols:play-circle-outline"
                         class="size-8"

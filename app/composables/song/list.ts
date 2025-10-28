@@ -225,12 +225,14 @@ export const usePlayer = (songs: Song[]) => {
     )
     const nextIndex = currentIndex + 1
 
-    if (nextIndex < songs.length) {
-      start(nextIndex)
-    } else {
+    if (songs.length <= nextIndex) {
       stop()
       clearPlayingText()
+
+      return
     }
+
+    start({ startIndex: nextIndex })
   }
 
   const prev = () => {
@@ -238,38 +240,48 @@ export const usePlayer = (songs: Song[]) => {
       return
     }
 
-    const currentIndex = songs.findIndex(
+    const currentIndex = playlist.value.findIndex(
       (song) => song.id === nowPlaying.value?.id,
     )
 
     if (3 < elapsedSeconds.value) {
-      start(currentIndex)
+      start({ startIndex: currentIndex })
       return
     }
 
     const prevIndex = currentIndex - 1
 
-    if (0 <= prevIndex) {
-      start(prevIndex)
-    } else {
+    if (prevIndex < 0) {
       stop()
       clearPlayingText()
+      return
     }
+
+    start({ startIndex: prevIndex })
   }
 
-  const start = (startIndex?: number) => {
+  const start = (
+    option?: Partial<{
+      startIndex: number
+      playlist: Song[]
+    }>,
+  ) => {
     clearTimeout(timeoutId.value)
     clearPlayingText()
     timeoutHandler.value = null
     // 指定がない場合は0からスタート
-    const index = startIndex ?? 0
+    const index = option?.startIndex ?? 0
 
-    if (songs.length < index - 1) {
+    if (option?.playlist) {
+      playlist.value = option.playlist
+    }
+
+    if (playlist.value.length < index - 1) {
       return
     }
-    console.log(JSON.stringify(playlist.value))
-    // const song = songs[index]
+
     const song = playlist.value[index]
+
     if (!song) {
       console.error('song is undefined')
       return
@@ -288,7 +300,7 @@ export const usePlayer = (songs: Song[]) => {
         stop()
         return
       }
-      start(index + 1)
+      start({ startIndex: index + 1 })
     }
     timeoutHandler.value = handler
 
