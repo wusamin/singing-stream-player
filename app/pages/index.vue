@@ -16,9 +16,9 @@ const {
 </script>
 
 <template>
-  <div class="h-svh flex flex-col bg-gray-100">
+  <div class="h-svh flex flex-col">
     <div class="flex flex-col h-full flex-1">
-      <div class="w-full bg-[#ffd8dd] h-[40px] px-5 flex items-center">
+      <div class="w-full accent-color h-[44px] px-5 flex items-center">
         <select class="channel-selector" v-model:="searchCondition.channelId">
           <option :value="undefined">すべて</option>
           <option
@@ -34,24 +34,34 @@ const {
         <div
           class="flex h-full flex-col lg:flex-row gap-0 gap-2 justify-center w-full"
         >
-          <div class="flex px-2">
+          <div class="flex px-2 lg:flex-col">
             <div
               ref="video"
-              class="w-[220px] h-[112px] lg:w-[640px] lg:h-[360px]"
+              class="w-[220px] h-[124px] lg:w-[640px] lg:h-[360px]"
             ></div>
-            <div class="ml-2 lg:hidden">
-              <span class="block font-medium text-lg">
+            <div class="ml-4 lg:hidden py-4">
+              <div class="font-medium text-lg flex items-center gap-1">
+                <Icon name="material-symbols:music-note" class="text-lg" />
+                <span>{{ nowPlaying?.meta.title ?? '-' }}</span>
+              </div>
+              <div class="mt-2 flex items-center gap-1">
+                <Icon name="material-symbols:artist-outline" class="text-lg" />
+                {{ nowPlaying?.meta.artist ?? '-' }}
+              </div>
+            </div>
+            <div class="hidden lg:block mt-4">
+              <span class="block font-medium text-xl">
                 {{ nowPlaying?.meta.title ?? '-' }}
               </span>
-              <span class="block text-sm">
+              <span class="block text-sm mt-2">
                 {{ nowPlaying?.meta.artist ?? '-' }}
               </span>
             </div>
           </div>
-          <div class="flex-1 overflow-y-scroll relative w-full">
+          <div class="flex-1 overflow-y-scroll relative w-full rounded-sm">
             <table v-if="status === 'success'" class="absolute w-full">
-              <thead class="">
-                <tr class="">
+              <thead>
+                <tr>
                   <th class="w-[32px] playlist-header"></th>
                   <th class="min-w-[280px] playlist-header">タイトル</th>
                   <th class="min-w-[60px] playlist-header"></th>
@@ -117,7 +127,7 @@ const {
         </div>
       </div>
     </div>
-    <div class="w-full bg-[#ffd8dd] h-[96px] py-2">
+    <div class="w-full weak-color h-[88px] py-2">
       <div
         class="w-full flex items-center gap-2 lg:pl-10 justify-center lg:justify-normal"
       >
@@ -145,10 +155,6 @@ const {
             class="w-full h-full hover:scale-[1.15]"
           />
         </button>
-        <div class="ml-10 hidden lg:block">
-          {{ nowPlaying?.meta.title ?? '再生中の曲はありません' }}
-          {{ nowPlaying ? ' - ' + nowPlaying.meta.artist : '' }}
-        </div>
       </div>
       <div class="w-full text-center">
         {{ playingTimeText }} / {{ playingTime?.totalTime ?? '0:00' }}
@@ -163,6 +169,14 @@ const {
 }
 
 .channel-selector {
-  @apply w-[260px] appearance-none rounded-md px-1 bg-gray-50;
+  @apply w-[260px] h-[32px] appearance-none rounded-md px-2;
+}
+
+.accent-color {
+  @apply bg-[#d86b98];
+}
+
+.weak-color {
+  @apply bg-[#ffd8dd];
 }
 </style>
