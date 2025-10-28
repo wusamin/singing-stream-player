@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+  font-family: "Material Icons Round";
+  font-style: normal;
+  font-weight: 400;
+  src: url(/fonts/MaterialIconsRound-Regular.woff2) format("woff2");
+  font-display: swap;
+}

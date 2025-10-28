@@ -11,6 +11,9 @@ export interface Song {
     channel: {
       id: string
       displayName: string
+      owner: {
+        displayName: string
+      }
     }
   }
   meta: {
@@ -35,18 +38,26 @@ interface Input {
   channelIds?: string[]
 }
 
-const getDisplayName = (channelId: string): string => {
+const getDisplayName = (
+  channelId: string,
+): { displayName: string; ownerName: string } => {
   switch (channelId) {
     case 'unohananonochi':
-      return '兎ノ花ののち'
+      return {
+        displayName: 'Nonochi Ch. 兎ノ花ののち',
+        ownerName: '兎ノ花ののち',
+      }
     case 'KomaiUme':
-      return '狛犬うめ'
+      return { displayName: 'Ume Ch. 狛犬うめ', ownerName: '狛犬うめ' }
     case 'sana_natori':
-      return '名取さな'
+      return { displayName: 'さなちゃんねる', ownerName: '名取さな' }
     case 'mishiomolf':
-      return '海汐もるふ'
+      return { displayName: 'Molf Ch. 海汐もるふ', ownerName: '海汐もるふ' }
     default:
-      return channelId
+      return {
+        displayName: channelId,
+        ownerName: '',
+      }
   }
 }
 
@@ -62,37 +73,44 @@ export const listSongs = async (input: Input): Promise<Result> => {
     )
     .orderBy(asc(videoMetas.publishedAt), asc(songs.startAt))
 
-  const data = result.map(
-    (row) =>
-      ({
-        id: row.songs.id,
-        video: {
-          id: String(row.video_metas.videoId),
-          title: String(row.video_metas.title),
-          publishedAt: row.video_metas.publishedAt,
-          channel: {
-            id: String(row.video_metas.channelId),
-            displayName: getDisplayName(String(row.video_metas.channelId)),
+  const data = result.map((row): Song => {
+    const channelData = getDisplayName(String(row.video_metas.channelId))
+    return {
+      id: row.songs.id,
+      video: {
+        id: String(row.video_metas.videoId),
+        title: String(row.video_metas.title),
+        publishedAt: row.video_metas.publishedAt,
+        channel: {
+          id: String(row.video_metas.channelId),
+          displayName: channelData.displayName,
+          owner: {
+            displayName: channelData.ownerName,
           },
         },
-        meta: {
-          title: String(row.songs.metaTitle),
-          artist: String(row.songs.metaArtist),
-        },
-        startAt: row.songs.startAt ?? 0,
-        endAt: row.songs.endAt ?? 0,
-      }) satisfies Song,
-  )
+      },
+      meta: {
+        title: String(row.songs.metaTitle),
+        artist: String(row.songs.metaArtist),
+      },
+      startAt: row.songs.startAt ?? 0,
+      endAt: row.songs.endAt ?? 0,
+    }
+  })
 
   // DBに保有している全チャンネルを取得
   const allVideoMetas = await db
     .selectDistinct({ channelId: videoMetas.channelId })
     .from(videoMetas)
 
-  const channels: Channel[] = allVideoMetas.map((row) => ({
-    id: String(row.channelId),
-    displayName: getDisplayName(String(row.channelId)),
-  }))
+  const channels: Channel[] = allVideoMetas.map((row) => {
+    const channel = getDisplayName(String(row.channelId))
+    return {
+      id: String(row.channelId),
+      displayName: channel.displayName,
+      owner: { name: channel.ownerName },
+    }
+  })
 
   return {
     data,

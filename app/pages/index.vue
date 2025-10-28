@@ -12,17 +12,14 @@ const {
   prev,
   pause,
   playerState,
-  setPlaylist,
 } = usePlayer(songs.value)
 </script>
 
 <template>
-  <div class="h-[calc(100vh-40px-96px-24px)] lg:h-[calc(100vh-96px-12px)]">
-    <div class="flex flex-col h-full">
-      <div class="w-full bg-[#ffd8dd] h-[40px]">
-        {{ searchCondition.channelIds }}
-        チャンネル:
-        <select class="w-[128px]" v-model:="searchCondition.channelIds">
+  <div class="h-svh flex flex-col bg-gray-100">
+    <div class="flex flex-col h-full flex-1">
+      <div class="w-full bg-[#ffd8dd] h-[40px] px-5 flex items-center">
+        <select class="channel-selector" v-model:="searchCondition.channelId">
           <option :value="undefined">すべて</option>
           <option
             v-for="channel in channels"
@@ -32,43 +29,42 @@ const {
             {{ channel.displayName }}
           </option>
         </select>
-        <button
-          @click="
-            () => {
-              setPlaylist(songs, true)
-            }
-          "
-        >
-          aaa
-        </button>
       </div>
-      <!--      <div class="h-[60px]">-->
-      <!--        <div v-if="nowPlaying">-->
-      <!--          Now Playing:-->
-      <!--          {{ nowPlaying.meta.title + ' - ' + nowPlaying.meta.artist }}-->
-      <!--        </div>-->
-      <!--      </div>-->
-      <!--      <div class="mt-4">-->
-      <!--        <button @click="() => start()">Start Player</button>-->
-      <!--      </div>-->
-      <div class="flex-1 w-full">
+      <div class="flex-1 w-full mt-2">
         <div
-          class="flex mt-4 h-full flex-col sm:flex-col md:flex-col lg:flex-row gap-0 gap-2 justify-center w-full"
+          class="flex h-full flex-col lg:flex-row gap-0 gap-2 justify-center w-full"
         >
-          <div
-            ref="video"
-            class="lg:w-[640px] lg:h-[360px] sm:w-[120px] sm:h-[68px] w-[220px] h-[112px] mx-auto"
-          ></div>
+          <div class="flex px-2">
+            <div
+              ref="video"
+              class="w-[220px] h-[112px] lg:w-[640px] lg:h-[360px]"
+            ></div>
+            <div class="ml-2 lg:hidden">
+              <span class="block font-medium text-lg">
+                {{ nowPlaying?.meta.title ?? '-' }}
+              </span>
+              <span class="block text-sm">
+                {{ nowPlaying?.meta.artist ?? '-' }}
+              </span>
+            </div>
+          </div>
           <div class="flex-1 overflow-y-scroll relative w-full">
             <table v-if="status === 'success'" class="absolute w-full">
-              <thead>
+              <thead class="">
                 <tr class="">
                   <th class="w-[32px] playlist-header"></th>
                   <th class="min-w-[280px] playlist-header">タイトル</th>
-                  <th class="min-w-[60px] playlist-header">時間</th>
-                  <th class="min-w-[140px] playlist-header">配信</th>
-                  <th class="min-w-[240px] playlist-header">配信</th>
-                  <!--                  <th class="w-[32px] playlist-header">a</th>-->
+                  <th class="min-w-[60px] playlist-header"></th>
+                  <th
+                    class="min-w-[140px] playlist-header hidden md:table-cell"
+                  >
+                    配信日
+                  </th>
+                  <th
+                    class="min-w-[240px] playlist-header hidden md:table-cell"
+                  >
+                    配信
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -91,17 +87,25 @@ const {
                     </button>
                   </td>
                   <td class="border-l px-2 py-2">
-                    <div class="text-lg">{{ song.meta.title }}</div>
+                    <div class="text-lg font-bold">{{ song.meta.title }}</div>
                     <div class="text-sm">{{ song.meta.artist }}</div>
+                    <div class="mt-2 text-sm md:hidden">
+                      {{ song.video.title }}
+                    </div>
+                    <div
+                      class="mt-1 text-sm md:hidden text-nowrap text-ellipsis overflow-hidden w-full"
+                    >
+                      {{ song.video.publishedAt.format('YYYY年MM月DD日') }}
+                    </div>
                   </td>
                   <td>
                     {{ song.duration }}
                   </td>
-                  <td class="">
+                  <td class="hidden md:table-cell">
                     {{ song.video.publishedAt.format('YYYY年MM月DD日') }}
                   </td>
                   <td
-                    class="text-nowrap text-ellipsis overflow-hidden w-[200px] max-w-0"
+                    class="text-nowrap text-ellipsis overflow-hidden w-[200px] max-w-0 hidden md:table-cell"
                   >
                     {{ song.video.title }}
                   </td>
@@ -113,8 +117,10 @@ const {
         </div>
       </div>
     </div>
-    <div class="absolute bottom-0 left-0 w-full bg-[#ffd8dd] h-[96px] py-2">
-      <div class="w-full flex justify-center items-center gap-2">
+    <div class="w-full bg-[#ffd8dd] h-[96px] py-2">
+      <div
+        class="w-full flex items-center gap-2 lg:pl-10 justify-center lg:justify-normal"
+      >
         <button @click="prev" class="w-[36px] h-[36px]">
           <Icon
             name="material-symbols:skip-previous-outline"
@@ -139,6 +145,10 @@ const {
             class="w-full h-full hover:scale-[1.15]"
           />
         </button>
+        <div class="ml-10 hidden lg:block">
+          {{ nowPlaying?.meta.title ?? '再生中の曲はありません' }}
+          {{ nowPlaying ? ' - ' + nowPlaying.meta.artist : '' }}
+        </div>
       </div>
       <div class="w-full text-center">
         {{ playingTimeText }} / {{ playingTime?.totalTime ?? '0:00' }}
@@ -150,5 +160,9 @@ const {
 <style lang="css" scoped>
 .playlist-header {
   @apply text-left bg-[#ffd8dd] sticky top-0 z-10;
+}
+
+.channel-selector {
+  @apply w-[260px] appearance-none rounded-md px-1 bg-gray-50;
 }
 </style>

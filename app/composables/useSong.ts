@@ -44,16 +44,19 @@ type Response = {
 
 interface Option {
   channelIds?: string[]
+  channelId?: string
 }
 
 export const useSongs = async () => {
-  const searchCondition = ref<Option>({})
+  const searchCondition = ref<Option>({
+    channelId: 'unohananonochi',
+  })
 
   const { data, status } = useFetch<Response>('/api/songs', {
     query: computed(() => ({
       ...searchCondition.value,
-      channelIds: searchCondition.value?.channelIds
-        ? [searchCondition.value.channelIds].join(',')
+      channelIds: searchCondition.value?.channelId
+        ? [searchCondition.value.channelId]
         : undefined,
     })),
   })
