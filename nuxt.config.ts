@@ -13,6 +13,9 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
+      title: 'ののちのお歌プレーヤー',
+      meta: [{ charset: 'utf-8' }],
+      htmlAttrs: { lang: 'ja' },
       link: [
         {
           rel: 'stylesheet',
