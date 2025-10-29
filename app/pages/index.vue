@@ -35,13 +35,13 @@ const {
         <div
           class="flex h-full flex-col lg:flex-row gap-2 justify-center w-full"
         >
-          <div class="flex px-2 lg:flex-col w-[220px] lg:w-[640px]">
+          <div class="flex px-2 lg:flex-col lg:w-[640px] h-[124px] lg:h-auto">
             <div
               ref="video"
               class="w-[220px] h-[124px] lg:w-[640px] lg:h-[360px]"
             ></div>
-            <div class="ml-4 lg:hidden py-4">
-              <div class="font-medium text-lg flex items-center gap-1">
+            <div class="ml-4 lg:hidden py-4 flex-1">
+              <div class="font-medium text-lg flex items-center gap-1 w-full">
                 <Icon name="material-symbols:music-note" class="text-lg" />
                 <span>{{ nowPlaying?.meta.title ?? '-' }}</span>
               </div>
@@ -50,7 +50,7 @@ const {
                 {{ nowPlaying?.meta.artist ?? '-' }}
               </div>
             </div>
-            <div class="hidden lg:block mt-4 flex-1">
+            <div class="hidden lg:block mt-2 flex-1">
               <div>
                 <div class="font-medium text-2xl flex items-center">
                   <Icon name="material-symbols:music-note" class="text-2xl" />
@@ -58,7 +58,9 @@ const {
                     {{ nowPlaying?.meta.title ?? '-' }}
                   </span>
                 </div>
-                <div class="ml-1 mt-2 flex items-center">
+                <div
+                  class="ml-1 mt-2 flex items-center text-nowrap text-ellipsis overflow-hidden"
+                >
                   <Icon
                     name="material-symbols:artist-outline"
                     class="w-[20px] h-[20px]"
