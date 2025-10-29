@@ -12,11 +12,12 @@ const {
   prev,
   pause,
   playerState,
+  playShuffle,
 } = usePlayer(songs.value)
 </script>
 
 <template>
-  <div class="h-svh flex flex-col">
+  <div class="h-svh flex flex-col bg-[#F4F5F7]">
     <div class="flex flex-col h-full flex-1">
       <div class="w-full accent-color h-[44px] px-5 flex items-center">
         <select class="channel-selector" v-model:="searchCondition.channelId">
@@ -32,9 +33,9 @@ const {
       </div>
       <div class="flex-1 w-full mt-2">
         <div
-          class="flex h-full flex-col lg:flex-row gap-0 gap-2 justify-center w-full"
+          class="flex h-full flex-col lg:flex-row gap-2 justify-center w-full"
         >
-          <div class="flex px-2 lg:flex-col">
+          <div class="flex px-2 lg:flex-col w-[220px] lg:w-[640px]">
             <div
               ref="video"
               class="w-[220px] h-[124px] lg:w-[640px] lg:h-[360px]"
@@ -49,17 +50,56 @@ const {
                 {{ nowPlaying?.meta.artist ?? '-' }}
               </div>
             </div>
-            <div class="hidden lg:block mt-4">
-              <span class="block font-medium text-xl">
-                {{ nowPlaying?.meta.title ?? '-' }}
-              </span>
-              <span class="block text-sm mt-2">
-                {{ nowPlaying?.meta.artist ?? '-' }}
-              </span>
+            <div class="hidden lg:block mt-4 flex-1">
+              <div>
+                <div class="font-medium text-2xl flex items-center">
+                  <Icon name="material-symbols:music-note" class="text-2xl" />
+                  <span class="ml-1">
+                    {{ nowPlaying?.meta.title ?? '-' }}
+                  </span>
+                </div>
+                <div class="ml-1 mt-2 flex items-center">
+                  <Icon
+                    name="material-symbols:artist-outline"
+                    class="w-[20px] h-[20px]"
+                  />
+                  <span class="ml-[4px]">
+                    {{ nowPlaying?.meta.artist ?? '-' }}
+                  </span>
+                </div>
+              </div>
+              <div class="mt-4">
+                <div class="wrap-anywhere break-all ml-1 flex items-center">
+                  <Icon
+                    name="material-symbols:youtube-tv-outline"
+                    class="w-[20px] h-[20px]"
+                  />
+                  <div v-if="!nowPlaying" class="ml-1">-</div>
+                  <NuxtLink
+                    v-else
+                    external
+                    :to="nowPlaying?.video.url"
+                    class="underline hover:text-red-600 ml-1"
+                  >
+                    {{ nowPlaying.video.title }}
+                  </NuxtLink>
+                </div>
+                <div class="mt-1 ml-1 flex h-[24px] items-center">
+                  <Icon name="ic:round-access-time" class="w-[20px] h-[20px]" />
+                  <span class="ml-1">
+                    {{
+                      nowPlaying?.video.publishedAt.format('YYYY年MM月DD日') ??
+                      '-'
+                    }}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="flex-1 overflow-y-scroll relative w-full rounded-sm">
-            <table v-if="status === 'success'" class="absolute w-full">
+          <div
+            class="flex-1 overflow-y-scroll relative w-full rounded-sm lg:ml-2"
+          >
+            <table class="absolute w-full bg-[#ffffff]">
               <thead>
                 <tr>
                   <th class="w-[32px] playlist-header"></th>
@@ -77,7 +117,7 @@ const {
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody v-if="status === 'success'">
                 <tr
                   v-for="(song, index) in songs"
                   :key="song.id"
@@ -122,39 +162,45 @@ const {
                 </tr>
               </tbody>
             </table>
-            <div v-else>loading...</div>
+            <div v-if="status !== 'success'">loading...</div>
           </div>
         </div>
       </div>
     </div>
     <div class="w-full weak-color h-[88px] py-2">
-      <div
-        class="w-full flex items-center gap-2 lg:pl-10 justify-center lg:justify-normal"
-      >
-        <button @click="prev" class="w-[36px] h-[36px]">
-          <Icon
-            name="material-symbols:skip-previous-outline"
-            class="w-full h-full hover:scale-[1.15]"
-          />
-        </button>
-        <button @click="pause" class="w-[48px] h-[48px]">
-          <Icon
-            v-if="playerState === 'PLAYING' || playerState === 'BUFFERING'"
-            name="material-symbols:pause-circle-outline"
-            class="w-full h-full hover:scale-[1.05]"
-          />
-          <Icon
-            v-else
-            name="material-symbols:play-circle-outline"
-            class="w-full h-full hover:scale-[1.05]"
-          />
-        </button>
-        <button @click="next" class="w-[36px] h-[36px]">
-          <Icon
-            name="material-symbols:skip-next-outline"
-            class="w-full h-full hover:scale-[1.15]"
-          />
-        </button>
+      <div class="w-full flex items-center gap-4 justify-center">
+        <div class="w-[120px]"></div>
+        <div class="flex items-center w-[120px]">
+          <button @click="prev" class="w-[36px] h-[36px]">
+            <Icon
+              name="material-symbols:skip-previous-outline"
+              class="w-full h-full hover:scale-[1.15]"
+            />
+          </button>
+          <button @click="pause" class="w-[48px] h-[48px]">
+            <Icon
+              v-if="playerState === 'PLAYING' || playerState === 'BUFFERING'"
+              name="material-symbols:pause-circle-outline"
+              class="w-full h-full hover:scale-[1.05]"
+            />
+            <Icon
+              v-else
+              name="material-symbols:play-circle-outline"
+              class="w-full h-full hover:scale-[1.05]"
+            />
+          </button>
+          <button @click="next" class="w-[36px] h-[36px]">
+            <Icon
+              name="material-symbols:skip-next-outline"
+              class="w-full h-full hover:scale-[1.15]"
+            />
+          </button>
+        </div>
+        <div class="flex items-center w-[120px]">
+          <button @click="playShuffle" class="w-[24px] h-[24px]">
+            <Icon name="ix:random" class="w-full h-full hover:scale-[1.15]" />
+          </button>
+        </div>
       </div>
       <div class="w-full text-center">
         {{ playingTimeText }} / {{ playingTime?.totalTime ?? '0:00' }}

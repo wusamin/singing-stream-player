@@ -1,3 +1,4 @@
+import * as R from 'remeda'
 import type { Song } from './useSong'
 
 const usePlayingTime = () => {
@@ -114,17 +115,19 @@ export const usePlayer = (songs: Song[]) => {
       const currentTime = event.target.getCurrentTime()
 
       if (
-        currentTime <= nowPlaying.value.endAt &&
-        timeoutHandler.value !== null
+        nowPlaying.value.endAt < currentTime ||
+        timeoutHandler.value === null
       ) {
-        timeoutId.value = window.setTimeout(
-          timeoutHandler.value,
-          (nowPlaying.value.endAt - currentTime) * 1000,
-        )
-        setPlayingTime(Math.round(currentTime - nowPlaying.value.startAt))
-        stopPlayingText()
-        startPlayingText()
+        console.log('時間外再生検出、次の曲へ移動します')
+        return
       }
+      timeoutId.value = window.setTimeout(
+        timeoutHandler.value,
+        (nowPlaying.value.endAt - currentTime) * 1000,
+      )
+      setPlayingTime(Math.round(currentTime - nowPlaying.value.startAt))
+      stopPlayingText()
+      startPlayingText()
     }
   })
 
@@ -172,6 +175,12 @@ export const usePlayer = (songs: Song[]) => {
     start({ startIndex: prevIndex })
   }
 
+  const playShuffle = () =>
+    start({
+      startIndex: 0,
+      playlist: R.shuffle(playlist.value),
+    })
+
   const start = (
     option?: Partial<{
       startIndex: number
@@ -208,7 +217,7 @@ export const usePlayer = (songs: Song[]) => {
     }
 
     timeoutHandler.value = () => {
-      if (songs.length - 1 === index) {
+      if (playlist.value.length - 1 === index) {
         stop()
         return
       }
@@ -232,5 +241,6 @@ export const usePlayer = (songs: Song[]) => {
     playingTimeText,
     playerState: state,
     setPlaylist,
+    playShuffle,
   }
 }

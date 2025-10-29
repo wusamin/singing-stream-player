@@ -7,6 +7,10 @@ export interface Song {
     id: string
     title: string
     publishedAt: dayjs.Dayjs
+    url: string
+    thumbnail: {
+      url: string
+    }
   }
   meta: {
     title: string
@@ -71,6 +75,15 @@ export const useSongs = async () => {
             video: {
               ...i.video,
               publishedAt: dayjs(i.video.publishedAt),
+              url: (() => {
+                const url = new URL('https://www.youtube.com/watch')
+                url.searchParams.set('v', i.video.id)
+                url.searchParams.set('t', `${i.startAt}s`)
+                return url.toString()
+              })(),
+              thumbnail: {
+                url: `https://img.youtube.com/vi/${i.video.id}/maxresdefault.jpg`,
+              },
             },
             duration: ((): string => {
               const d = i.endAt - i.startAt
