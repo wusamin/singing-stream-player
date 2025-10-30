@@ -21,7 +21,7 @@ const {
     <div class="flex flex-col h-full flex-1">
       <div class="w-full accent-color h-[44px] px-2 flex items-center">
         <select
-          class="channel-selector cursor-pointer"
+          class="channel-selector cursor-pointer focus:border-0 focus:outline-none"
           v-model:="searchCondition.channelId"
         >
           <option :value="undefined">すべて</option>
@@ -62,9 +62,9 @@ const {
                 </span>
               </div>
             </div>
-            <div class="hidden lg:block mt-2 flex-1">
+            <div class="hidden lg:block mt-4 flex-1">
               <div>
-                <div class="font-medium text-2xl flex items-center gap-2">
+                <div class="font-bold text-2xl flex items-center gap-2">
                   <Icon name="material-symbols:music-note" class="text-2xl" />
                   <span class="ml-1">
                     {{ nowPlaying?.meta.title ?? '-' }}
@@ -209,8 +209,8 @@ const {
     </div>
     <div class="w-full weak-color h-[88px] py-2">
       <div class="w-full flex items-center gap-4 justify-center">
-        <div class="w-[120px]"></div>
-        <div class="flex items-center w-[120px]">
+        <div class="w-[140px]"></div>
+        <div class="flex items-center w-[140px] gap-4">
           <button @click="prev" class="w-[36px] h-[36px]">
             <Icon
               name="material-symbols:skip-previous-outline"
@@ -236,7 +236,7 @@ const {
             />
           </button>
         </div>
-        <div class="flex items-center w-[120px]">
+        <div class="flex items-center w-[140px]">
           <button @click="playShuffle" class="w-[24px] h-[24px]">
             <Icon name="ix:random" class="w-full h-full hover:scale-[1.15]" />
           </button>
@@ -285,7 +285,6 @@ const {
 }
 
 ::-webkit-scrollbar-thumb {
-  //background: #d86b98;
   background: rgba(216, 107, 152, 0.2);
 }
 

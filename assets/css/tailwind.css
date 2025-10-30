@@ -9,3 +9,7 @@
   src: url(/fonts/MaterialIconsRound-Regular.woff2) format("woff2");
   font-display: swap;
 }
+
+body {
+  font-family: "Noto Sans JP", sans-serif;
+}
