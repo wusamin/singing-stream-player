@@ -13,6 +13,7 @@ export interface Song {
       displayName: string
       owner: {
         displayName: string
+        fanMark: string
       }
     }
   }
@@ -40,23 +41,37 @@ interface Input {
 
 const getDisplayName = (
   channelId: string,
-): { displayName: string; ownerName: string } => {
+): { displayName: string; ownerName: string; fanMark: string } => {
   switch (channelId) {
     case 'unohananonochi':
       return {
         displayName: 'Nonochi Ch. 兎ノ花ののち',
         ownerName: '兎ノ花ののち',
+        fanMark: '🐰🌸',
       }
     case 'KomaiUme':
-      return { displayName: 'Ume Ch. 狛犬うめ', ownerName: '狛犬うめ' }
+      return {
+        displayName: 'Ume Ch. 狛犬うめ',
+        ownerName: '狛犬うめ',
+        fanMark: '🌐🐾',
+      }
     case 'sana_natori':
-      return { displayName: 'さなちゃんねる', ownerName: '名取さな' }
+      return {
+        displayName: 'さなちゃんねる',
+        ownerName: '名取さな',
+        fanMark: '',
+      }
     case 'mishiomolf':
-      return { displayName: 'Molf Ch. 海汐もるふ', ownerName: '海汐もるふ' }
+      return {
+        displayName: 'Molf Ch. 海汐もるふ',
+        ownerName: '海汐もるふ',
+        fanMark: '☠️⚓️',
+      }
     default:
       return {
         displayName: channelId,
         ownerName: '',
+        fanMark: '',
       }
   }
 }
@@ -86,6 +101,7 @@ export const listSongs = async (input: Input): Promise<Result> => {
           displayName: channelData.displayName,
           owner: {
             displayName: channelData.ownerName,
+            fanMark: channelData.fanMark,
           },
         },
       },
@@ -108,7 +124,7 @@ export const listSongs = async (input: Input): Promise<Result> => {
     return {
       id: String(row.channelId),
       displayName: channel.displayName,
-      owner: { name: channel.ownerName },
+      owner: { name: channel.ownerName, fanMark: channel.fanMark },
     }
   })
 

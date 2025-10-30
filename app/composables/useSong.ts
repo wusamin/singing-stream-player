@@ -11,6 +11,13 @@ export interface Song {
     thumbnail: {
       url: string
     }
+    channel: {
+      id: string
+      displayName: string
+      owner: {
+        displayName: string
+      }
+    }
   }
   meta: {
     title: string
@@ -31,6 +38,10 @@ type Response = {
       channel: {
         id: string
         displayName: string
+        owner: {
+          displayName: string
+          fanMark: string
+        }
       }
     }
     meta: {
@@ -43,6 +54,10 @@ type Response = {
   channels: {
     id: string
     displayName: string
+    owner: {
+      displayName: string
+      fanMark: string
+    }
   }[]
 }
 

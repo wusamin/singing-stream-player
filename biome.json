@@ -27,7 +27,7 @@
   "html": {
     "experimentalFullSupportEnabled": false,
     "formatter": {
-      "indentScriptAndStyle": true
+      "indentScriptAndStyle": false
     }
   },
   "assist": {

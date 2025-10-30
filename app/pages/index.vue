@@ -19,7 +19,7 @@ const {
 <template>
   <div class="h-svh flex flex-col bg-[#F4F5F7]">
     <div class="flex flex-col h-full flex-1">
-      <div class="w-full accent-color h-[44px] px-5 flex items-center">
+      <div class="w-full accent-color h-[44px] px-2 flex items-center">
         <select class="channel-selector" v-model:="searchCondition.channelId">
           <option :value="undefined">すべて</option>
           <option
@@ -27,7 +27,7 @@ const {
             :key="channel.id"
             :value="channel.id"
           >
-            {{ channel.displayName }}
+            {{ channel.displayName }} {{ channel.owner.fanMark }}
           </option>
         </select>
       </div>
@@ -52,14 +52,14 @@ const {
             </div>
             <div class="hidden lg:block mt-2 flex-1">
               <div>
-                <div class="font-medium text-2xl flex items-center">
+                <div class="font-medium text-2xl flex items-center gap-2">
                   <Icon name="material-symbols:music-note" class="text-2xl" />
                   <span class="ml-1">
                     {{ nowPlaying?.meta.title ?? '-' }}
                   </span>
                 </div>
                 <div
-                  class="ml-1 mt-2 flex items-center text-nowrap text-ellipsis overflow-hidden"
+                  class="ml-1 mt-2 flex items-center text-nowrap text-ellipsis overflow-hidden gap-2"
                 >
                   <Icon
                     name="material-symbols:artist-outline"
@@ -71,7 +71,9 @@ const {
                 </div>
               </div>
               <div class="mt-4">
-                <div class="wrap-anywhere break-all ml-1 flex items-center">
+                <div
+                  class="wrap-anywhere break-all ml-1 flex items-center gap-2"
+                >
                   <Icon
                     name="material-symbols:youtube-tv-outline"
                     class="w-[20px] h-[20px]"
@@ -80,13 +82,18 @@ const {
                   <NuxtLink
                     v-else
                     external
+                    target="_blank"
                     :to="nowPlaying?.video.url"
-                    class="underline hover:text-red-600 ml-1"
+                    class="underline hover:text-red-600 ml-1 flex items-center"
                   >
                     {{ nowPlaying.video.title }}
+                    <Icon
+                      name="system-uicons:external"
+                      class="w-[20px] h-[20px]"
+                    />
                   </NuxtLink>
                 </div>
-                <div class="mt-1 ml-1 flex h-[24px] items-center">
+                <div class="mt-1 ml-1 flex h-[24px] items-center gap-2">
                   <Icon name="ic:round-access-time" class="w-[20px] h-[20px]" />
                   <span class="ml-1">
                     {{
@@ -105,8 +112,19 @@ const {
               <thead>
                 <tr>
                   <th class="w-[32px] playlist-header"></th>
-                  <th class="min-w-[280px] playlist-header">タイトル</th>
-                  <th class="min-w-[60px] playlist-header"></th>
+                  <th class="min-w-[280px] playlist-header">
+                    <span class="invisible lg:visible">タイトル</span>
+                  </th>
+                  <th class="min-w-[45px] playlist-header text-center">
+                    <Icon
+                      name="mdi:clock-time-three-outline"
+                      class="w-[20px] h-[20px]"
+                    />
+                  </th>
+                  <th
+                    v-if="!searchCondition.channelId"
+                    class="min-w-[120px] w-[120px] playlist-header"
+                  ></th>
                   <th
                     class="min-w-[140px] playlist-header hidden md:table-cell"
                   >
@@ -135,6 +153,9 @@ const {
                       <Icon
                         name="material-symbols:play-circle-outline"
                         class="size-8"
+                        :class="
+                          nowPlaying?.id === song.id ? 'accent-color' : ''
+                        "
                       />
                     </button>
                   </td>
@@ -153,11 +174,14 @@ const {
                   <td>
                     {{ song.duration }}
                   </td>
-                  <td class="hidden md:table-cell">
+                  <td v-if="!searchCondition.channelId" class="text-sm">
+                    {{ song.video.channel.owner.displayName }}
+                  </td>
+                  <td class="hidden md:table-cell text-sm">
                     {{ song.video.publishedAt.format('YYYY年MM月DD日') }}
                   </td>
                   <td
-                    class="text-nowrap text-ellipsis overflow-hidden w-[200px] max-w-0 hidden md:table-cell"
+                    class="text-nowrap text-ellipsis overflow-hidden w-[200px] max-w-0 hidden md:table-cell text-sm"
                   >
                     {{ song.video.title }}
                   </td>
