@@ -169,7 +169,10 @@ const {
                       />
                     </button>
                   </td>
-                  <td class="border-l px-2 py-2">
+                  <td
+                    class="border-l px-2 py-2"
+                    :class="nowPlaying?.id === song.id ? 'text-[#d86b98]' : ''"
+                  >
                     <div class="text-lg font-bold">{{ song.meta.title }}</div>
                     <div class="text-sm">{{ song.meta.artist }}</div>
                     <div class="mt-2 text-sm md:hidden">
@@ -270,17 +273,23 @@ const {
 .playlist-row:hover {
   @apply bg-gray-100;
 }
+
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 16px;
   height: 0px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #ffffff;
+  background: #f4f5f7;
   opacity: 0.1;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d86b98;
+  //background: #d86b98;
+  background: rgba(216, 107, 152, 0.2);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(216, 107, 152, 0.7);
 }
 </style>
