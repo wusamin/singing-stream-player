@@ -16,6 +16,7 @@ export interface Song {
       displayName: string
       owner: {
         displayName: string
+        fanMark: string
       }
     }
   }

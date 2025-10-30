@@ -20,7 +20,10 @@ const {
   <div class="h-svh flex flex-col bg-[#F4F5F7]">
     <div class="flex flex-col h-full flex-1">
       <div class="w-full accent-color h-[44px] px-2 flex items-center">
-        <select class="channel-selector" v-model:="searchCondition.channelId">
+        <select
+          class="channel-selector cursor-pointer"
+          v-model:="searchCondition.channelId"
+        >
           <option :value="undefined">すべて</option>
           <option
             v-for="channel in channels"
@@ -45,9 +48,18 @@ const {
                 <Icon name="material-symbols:music-note" class="text-lg" />
                 <span>{{ nowPlaying?.meta.title ?? '-' }}</span>
               </div>
-              <div class="mt-2 flex items-center gap-1">
+              <div class="mt-1 flex items-center gap-1 text-sm">
                 <Icon name="material-symbols:artist-outline" class="text-lg" />
                 {{ nowPlaying?.meta.artist ?? '-' }}
+              </div>
+              <div class="mt-4 flex items-center gap-1 text-sm">
+                <Icon name="ic:round-access-time" class="text-lg" />
+                <span class="">
+                  {{
+                    nowPlaying?.video.publishedAt.format('YYYY年MM月DD日') ??
+                    '-'
+                  }}
+                </span>
               </div>
             </div>
             <div class="hidden lg:block mt-2 flex-1">
@@ -112,9 +124,7 @@ const {
               <thead>
                 <tr>
                   <th class="w-[32px] playlist-header"></th>
-                  <th class="min-w-[280px] playlist-header">
-                    <span class="invisible lg:visible">タイトル</span>
-                  </th>
+                  <th class="min-w-[280px] playlist-header"></th>
                   <th class="min-w-[45px] playlist-header text-center">
                     <Icon
                       name="mdi:clock-time-three-outline"
@@ -123,7 +133,7 @@ const {
                   </th>
                   <th
                     v-if="!searchCondition.channelId"
-                    class="min-w-[120px] w-[120px] playlist-header"
+                    class="min-w-[140px] w-[140px] playlist-header"
                   ></th>
                   <th
                     class="min-w-[140px] playlist-header hidden md:table-cell"
@@ -142,7 +152,7 @@ const {
                   v-for="(song, index) in songs"
                   :key="song.id"
                   :class="nowPlaying?.id === song.id ? 'bg-red-50' : ''"
-                  class="border-b-2"
+                  class="border-b-2 playlist-row"
                 >
                   <td class="text-center align-middle px-2">
                     <button
@@ -175,6 +185,7 @@ const {
                     {{ song.duration }}
                   </td>
                   <td v-if="!searchCondition.channelId" class="text-sm">
+                    {{ song.video.channel.owner.fanMark }}
                     {{ song.video.channel.owner.displayName }}
                   </td>
                   <td class="hidden md:table-cell text-sm">
@@ -250,5 +261,26 @@ const {
 
 .weak-color {
   @apply bg-[#ffd8dd];
+}
+
+.playlist-row {
+  transition: background-color 0.3s ease;
+}
+
+.playlist-row:hover {
+  @apply bg-gray-100;
+}
+::-webkit-scrollbar {
+  width: 8px;
+  height: 0px;
+}
+
+::-webkit-scrollbar-track {
+  background: #ffffff;
+  opacity: 0.1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d86b98;
 }
 </style>
