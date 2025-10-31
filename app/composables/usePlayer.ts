@@ -46,6 +46,8 @@ export const usePlayer = (songs: Song[]) => {
   )
 
   const playlist = ref<Song[]>(songs)
+  // シャッフルに関連して元のデータが必要なため。
+  const songsRef = ref<Song[]>(songs)
 
   const setPlaylist = async (_playlist: Song[], loadVideo: boolean) => {
     playlist.value = _playlist
@@ -181,6 +183,24 @@ export const usePlayer = (songs: Song[]) => {
       playlist: R.shuffle(playlist.value),
     })
 
+  const sufflePlaylist = () => {
+    if (nowPlaying.value === null) {
+      playlist.value = R.shuffle(playlist.value)
+      return
+    }
+
+    playlist.value = [nowPlaying.value, ...R.shuffle(playlist.value)]
+  }
+
+  // playlistの並びが変更されている場合はシャッフルされている
+  const isShuffled = computed(
+    () =>
+      !R.isShallowEqual(
+        songsRef.value.map((s) => s.id),
+        playlist.value.map((s) => s.id),
+      ),
+  )
+
   const start = (
     option?: Partial<{
       startIndex: number
@@ -195,6 +215,7 @@ export const usePlayer = (songs: Song[]) => {
 
     if (option?.playlist) {
       playlist.value = option.playlist
+      songsRef.value = option.playlist
     }
 
     if (playlist.value.length < index - 1) {
@@ -242,5 +263,7 @@ export const usePlayer = (songs: Song[]) => {
     playerState: state,
     setPlaylist,
     playShuffle,
+    sufflePlaylist,
+    isShuffled,
   }
 }

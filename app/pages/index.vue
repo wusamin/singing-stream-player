@@ -13,6 +13,8 @@ const {
   pause,
   playerState,
   playShuffle,
+  sufflePlaylist,
+  isShuffled,
 } = usePlayer(songs.value)
 </script>
 
@@ -209,7 +211,15 @@ const {
     </div>
     <div class="w-full weak-color h-[88px] py-2">
       <div class="w-full flex items-center gap-4 justify-center">
-        <div class="w-[140px]"></div>
+        <div class="w-[140px] flex flex-row-reverse">
+          <button @click="sufflePlaylist">
+            <Icon
+              name="ic:round-shuffle"
+              class="w-[24px] h-[24px] hover:scale-[1.15]"
+              :class="isShuffled ? 'accent-color' : 'bg-gray-400'"
+            />
+          </button>
+        </div>
         <div class="flex items-center w-[140px] gap-4">
           <button @click="prev" class="w-[36px] h-[36px]">
             <Icon

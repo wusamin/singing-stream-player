@@ -67,6 +67,13 @@ const getDisplayName = (
         ownerName: '海汐もるふ',
         fanMark: '☠️⚓️',
       }
+    case 'MEMENTOVANITAS':
+      return {
+        displayName: 'メーメントヴァニタス / MEMENTOVANITAS',
+        ownerName: 'メーメントヴァニタス',
+        fanMark: '👁️‍🗨️🗝️',
+      }
+
     default:
       return {
         displayName: channelId,
