@@ -13,7 +13,8 @@ const {
   pause,
   playerState,
   playShuffle,
-  sufflePlaylist,
+  shufflePlaylist,
+  unshufflePlaylist,
   isShuffled,
 } = usePlayer(songs.value)
 </script>
@@ -122,12 +123,12 @@ const {
           <div
             class="flex-1 overflow-y-scroll relative w-full rounded-sm lg:ml-2"
           >
-            <table class="absolute w-full bg-[#ffffff]">
+            <table class="absolute w-full bg-[#ffffff] table-fixed">
               <thead>
                 <tr>
-                  <th class="w-[32px] playlist-header"></th>
+                  <th class="w-[40px] playlist-header"></th>
                   <th class="min-w-[280px] playlist-header"></th>
-                  <th class="min-w-[45px] playlist-header text-center">
+                  <th class="w-[45px] playlist-header text-center">
                     <Icon
                       name="mdi:clock-time-three-outline"
                       class="w-[20px] h-[20px]"
@@ -135,11 +136,9 @@ const {
                   </th>
                   <th
                     v-if="!searchCondition.channelId"
-                    class="min-w-[140px] w-[140px] playlist-header"
+                    class="w-[140px] playlist-header"
                   ></th>
-                  <th
-                    class="min-w-[140px] playlist-header hidden md:table-cell"
-                  >
+                  <th class="w-[140px] playlist-header hidden md:table-cell">
                     配信日
                   </th>
                   <th
@@ -152,11 +151,12 @@ const {
               <tbody v-if="status === 'success'">
                 <tr
                   v-for="(song, index) in songs"
+                  :id="`${song.id}`"
                   :key="song.id"
                   :class="nowPlaying?.id === song.id ? 'bg-red-50' : ''"
                   class="border-b-2 playlist-row"
                 >
-                  <td class="text-center align-middle px-2">
+                  <td class="text-center align-middle">
                     <button
                       @click="
                         () => start({ startIndex: index, playlist: songs })
@@ -212,7 +212,11 @@ const {
     <div class="w-full weak-color h-[88px] py-2">
       <div class="w-full flex items-center gap-4 justify-center">
         <div class="w-[140px] flex flex-row-reverse">
-          <button @click="sufflePlaylist">
+          <button
+            @click="
+              () => (isShuffled ? unshufflePlaylist() : shufflePlaylist())
+            "
+          >
             <Icon
               name="ic:round-shuffle"
               class="w-[24px] h-[24px] hover:scale-[1.15]"

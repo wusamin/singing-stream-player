@@ -1,4 +1,5 @@
 import { asc, eq, inArray } from 'drizzle-orm'
+import * as R from 'remeda'
 import { db } from '../db'
 import { channels, songs, videoMetas } from '../db/schema'
 
@@ -91,15 +92,19 @@ export const listSongs = async (input: Input): Promise<Result> => {
         endAt: row.songs.endAt ?? 0,
       }),
     ),
-    channels: allVideoMetas.map(
-      (row): Channel => ({
-        id: String(row.video_metas.channelId),
-        displayName: row.channels.displayName,
-        owner: {
-          displayName: row.channels.ownerName,
-          fanMark: row.channels.fanMark || '',
-        },
-      }),
+    channels: R.pipe(
+      allVideoMetas,
+      R.map(
+        (row): Channel => ({
+          id: String(row.video_metas.channelId),
+          displayName: row.channels.displayName,
+          owner: {
+            displayName: row.channels.ownerName,
+            fanMark: row.channels.fanMark || '',
+          },
+        }),
+      ),
+      R.uniqueBy((i) => i.id),
     ),
   }
 }

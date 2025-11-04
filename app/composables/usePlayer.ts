@@ -141,9 +141,10 @@ export const usePlayer = (songs: Song[]) => {
     const currentIndex = playlist.value.findIndex(
       (song) => song.id === nowPlaying.value?.id,
     )
+
     const nextIndex = currentIndex + 1
 
-    if (songs.length <= nextIndex) {
+    if (playlist.value.length <= nextIndex) {
       stop()
       clearPlayingText()
 
@@ -184,13 +185,24 @@ export const usePlayer = (songs: Song[]) => {
       playlist: R.shuffle(playlist.value),
     })
 
-  const sufflePlaylist = () => {
+  const shufflePlaylist = () => {
     if (nowPlaying.value === null) {
       playlist.value = R.shuffle(playlist.value)
       return
     }
 
-    playlist.value = [nowPlaying.value, ...R.shuffle(playlist.value)]
+    playlist.value = [
+      nowPlaying.value,
+      ...R.pipe(
+        playlist.value,
+        R.filter((s) => s.id !== nowPlaying.value!.id),
+        R.shuffle(),
+      ),
+    ]
+  }
+
+  const unshufflePlaylist = () => {
+    playlist.value = [...songsRef.value]
   }
 
   // playlistの並びが変更されている場合はシャッフルされている
@@ -264,7 +276,8 @@ export const usePlayer = (songs: Song[]) => {
     playerState: state,
     setPlaylist,
     playShuffle,
-    sufflePlaylist,
     isShuffled,
+    shufflePlaylist,
+    unshufflePlaylist,
   }
 }
