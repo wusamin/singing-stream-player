@@ -69,19 +69,20 @@ export const useYoutube = (option?: Partial<Option>) => {
 
   const pause = async () => {
     if (player.value?.getPlayerState() === YT.PlayerState.PAUSED) {
-    if (
-      player.value?.getPlayerState() === YT.PlayerState.PAUSED ||
-      player.value?.getPlayerState() === YT.PlayerState.UNSTARTED
-    ) {
-      player.value?.playVideo()
-      return
-    }
-    if (player.value?.getPlayerState() === YT.PlayerState.PLAYING) {
-      player.value?.pauseVideo()
-      return
-    }
-    if (player.value?.getPlayerState() === YT.PlayerState.CUED) {
-      player.value?.playVideo()
+      if (
+        player.value?.getPlayerState() === YT.PlayerState.PAUSED ||
+        player.value?.getPlayerState() === YT.PlayerState.UNSTARTED
+      ) {
+        player.value?.playVideo()
+        return
+      }
+      if (player.value?.getPlayerState() === YT.PlayerState.PLAYING) {
+        player.value?.pauseVideo()
+        return
+      }
+      if (player.value?.getPlayerState() === YT.PlayerState.CUED) {
+        player.value?.playVideo()
+      }
     }
   }
 

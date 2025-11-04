@@ -42,6 +42,7 @@ export const usePlayer = (songs: Song[]) => {
   const { video, state, load, pause, setOnStateChange, loadByUrl } = useYoutube(
     {
       initialVideoId: songs[0]?.video.id,
+      startSeconds: songs[0]?.startAt ?? undefined,
     },
   )
 
