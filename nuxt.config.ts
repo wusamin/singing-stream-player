@@ -26,6 +26,7 @@ export default defineNuxtConfig({
       title: 'ののちのお歌プレーヤー',
       meta: [{ charset: 'utf-8' }],
       htmlAttrs: { lang: 'ja' },
+      script: [{ src: 'https://www.youtube.com/iframe_api' }],
       link: [
         {
           rel: 'stylesheet',

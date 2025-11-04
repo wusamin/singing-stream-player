@@ -1,5 +1,6 @@
 interface Option {
   initialVideoId: string
+  startSeconds: number
 }
 
 type PlayerState =
@@ -43,9 +44,15 @@ export const useYoutube = (option?: Partial<Option>) => {
             onStateChangeCallback.value(event)
           }
         })
+
         player.value = p
+        if (option?.startSeconds) {
+          setTimeout(() => {
+            player.value?.seekTo(option.startSeconds!, true)
+          }, 1000)
+        }
       }
-    }, 100)
+    }, 500)
   })
 
   const play = () => {
@@ -62,6 +69,10 @@ export const useYoutube = (option?: Partial<Option>) => {
 
   const pause = async () => {
     if (player.value?.getPlayerState() === YT.PlayerState.PAUSED) {
+    if (
+      player.value?.getPlayerState() === YT.PlayerState.PAUSED ||
+      player.value?.getPlayerState() === YT.PlayerState.UNSTARTED
+    ) {
       player.value?.playVideo()
       return
     }
