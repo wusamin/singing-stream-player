@@ -29,14 +29,11 @@ export const useYoutube = (option?: Partial<Option>) => {
       const PlayerConstructor = YouTube.Player as unknown as typeof YT.Player
       if (PlayerConstructor) {
         const p = new PlayerConstructor(video.value!, {
-          videoId: option?.initialVideoId || undefined,
           playerVars: {
             fs: 0,
             iv_load_policy: 3,
-            // controls: 0,
           },
         })
-        // p.seekTo(12000, true)
         p.addEventListener('onStateChange', (event) => {
           setState()
           // コールバックが設定されていれば呼び出す
@@ -46,9 +43,12 @@ export const useYoutube = (option?: Partial<Option>) => {
         })
 
         player.value = p
-        if (option?.startSeconds) {
+        if (option?.initialVideoId) {
           setTimeout(() => {
-            player.value?.seekTo(option.startSeconds!, true)
+            p.cueVideoByUrl(
+              `http://www.youtube.com/v/${option.initialVideoId}?version=3`,
+              option?.startSeconds || 0,
+            )
           }, 1000)
         }
       }
@@ -68,21 +68,19 @@ export const useYoutube = (option?: Partial<Option>) => {
   }
 
   const pause = async () => {
-    if (player.value?.getPlayerState() === YT.PlayerState.PAUSED) {
-      if (
-        player.value?.getPlayerState() === YT.PlayerState.PAUSED ||
-        player.value?.getPlayerState() === YT.PlayerState.UNSTARTED
-      ) {
-        player.value?.playVideo()
-        return
-      }
-      if (player.value?.getPlayerState() === YT.PlayerState.PLAYING) {
-        player.value?.pauseVideo()
-        return
-      }
-      if (player.value?.getPlayerState() === YT.PlayerState.CUED) {
-        player.value?.playVideo()
-      }
+    if (
+      player.value?.getPlayerState() === YT.PlayerState.PAUSED ||
+      player.value?.getPlayerState() === YT.PlayerState.UNSTARTED
+    ) {
+      player.value?.playVideo()
+      return
+    }
+    if (player.value?.getPlayerState() === YT.PlayerState.PLAYING) {
+      player.value?.pauseVideo()
+      return
+    }
+    if (player.value?.getPlayerState() === YT.PlayerState.CUED) {
+      player.value?.playVideo()
     }
   }
 
