@@ -204,7 +204,12 @@ const {
                 </tr>
               </tbody>
             </table>
-            <div v-if="status !== 'success'">loading...</div>
+            <div
+              v-if="status !== 'success'"
+              class="w-full flex items-center justify-center"
+            >
+              <div class="loading mt-10"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -304,5 +309,20 @@ const {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(216, 107, 152, 0.7);
+}
+
+.loading {
+  width: 5em;
+  height: 5em;
+  border-radius: 50%;
+  border: 0.25em solid #ccc;
+  border-top-color: #333;
+  animation: spinner 1.5s linear infinite;
+}
+
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>
