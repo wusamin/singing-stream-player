@@ -1,8 +1,17 @@
 <script setup lang="ts">
+import Disclaimer from '~/components/disclaimer.vue'
+import { useModal } from '~/composables'
+
 const props = defineProps<{
   visible: boolean
   dismiss: () => void
 }>()
+
+const {
+  visible: visibleModal,
+  show: showModal,
+  dismiss: dismissModal,
+} = useModal()
 
 // 内部状態: メニューコンテンツが表示中か、非表示アニメーション中か
 const isContentVisible = ref(props.visible)
@@ -33,12 +42,24 @@ const handleDismiss = () => {
     <Transition name="fade" appear @after-leave="props.dismiss">
       <div v-if="isContentVisible" class="bg-gray-100 shadow-lg p-6 w-64 menu">
         <ul class="space-y-4">
-          <li><button>このサイトについて</button></li>
+          <li>
+            <button
+              @click="
+                () => {
+                  props.dismiss()
+                  showModal()
+                }
+              "
+            >
+              このサイトについて
+            </button>
+          </li>
           <li><button>管理者ログイン</button></li>
         </ul>
       </div>
     </Transition>
   </div>
+  <Disclaimer :visible="visibleModal" :dismiss="dismissModal" />
 </template>
 
 <style scoped lang="css">

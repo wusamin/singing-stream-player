@@ -1,4 +1,5 @@
 export * from './useHamburgerMenu'
+export * from './useModal'
 export * from './usePlayer'
 export * from './useSong'
 export * from './useYoutube'
