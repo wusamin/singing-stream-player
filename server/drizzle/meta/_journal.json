@@ -15,6 +15,27 @@
       "when": 1762246827194,
       "tag": "0001_rainy_excalibur",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1762525885377,
+      "tag": "0002_dizzy_bloodaxe",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1762526045431,
+      "tag": "0003_ambiguous_major_mapleleaf",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1762526071079,
+      "tag": "0004_thin_kabuki",
+      "breakpoints": true
     }
   ]
 }

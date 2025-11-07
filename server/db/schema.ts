@@ -1,12 +1,17 @@
 import { relations } from 'drizzle-orm'
+import * as t from 'drizzle-orm/pg-core'
 import {
   integer,
+  pgEnum,
   pgTable,
   serial,
   text,
   timestamp,
   uuid,
 } from 'drizzle-orm/pg-core'
+
+// 諸事情で公に出せないものがあるので除外用の
+export const videoVisibilityEnum = pgEnum('visibility', ['public', 'private'])
 
 export const songs = pgTable('songs', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -28,15 +33,21 @@ export const songsRelations = relations(songs, ({ one }) => ({
   }),
 }))
 
-export const videoMetas = pgTable('video_metas', {
-  id: serial('id').primaryKey(),
-  videoId: text('video_id').notNull(),
-  channelId: text('channel_id').notNull(),
-  title: text('title').notNull(),
-  publishedAt: timestamp('published_at').notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-})
+export const videoMetas = pgTable(
+  'video_metas',
+  {
+    id: serial('id').primaryKey(),
+    videoId: text('video_id').notNull(),
+    channelId: text('channel_id').notNull(),
+    title: text('title').notNull(),
+    publishedAt: timestamp('published_at').notNull(),
+    // うっかりでpublicにすると事故る可能性があるのでデフォはprivate
+    visibility: videoVisibilityEnum().default('private'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [t.uniqueIndex('video_id_unique_idx').on(table.videoId)],
+)
 
 export const channels = pgTable('channels', {
   id: text('id').primaryKey(),
