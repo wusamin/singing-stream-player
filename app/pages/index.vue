@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { usePlayer, useSongs } from '@/composables'
+import HamburgerMenu from '@/components/hamburger-menu.vue'
+import { useHamburgerMenu, usePlayer, useSongs } from '@/composables'
 
 const { songs, status, channels, searchCondition } = await useSongs()
 const {
@@ -17,12 +18,16 @@ const {
   unshufflePlaylist,
   isShuffled,
 } = usePlayer(songs.value)
+const { visible, show, dismiss } = useHamburgerMenu()
 </script>
 
 <template>
+  <HamburgerMenu :visible="visible" :dismiss="dismiss" />
   <div class="h-svh flex flex-col bg-[#F4F5F7]">
     <div class="flex flex-col h-full flex-1">
-      <div class="w-full accent-color h-[44px] px-2 flex items-center">
+      <div
+        class="w-full accent-color h-[44px] px-2 flex items-center justify-between"
+      >
         <select
           class="channel-selector cursor-pointer focus:border-0 focus:outline-none"
           v-model:="searchCondition.channelId"
@@ -36,6 +41,9 @@ const {
             {{ channel.displayName }} {{ channel.owner.fanMark }}
           </option>
         </select>
+        <button @click="show">
+          <Icon name="ci:hamburger" class="w-8 h-8 text-gray-50" />
+        </button>
       </div>
       <div class="flex-1 w-full mt-2">
         <div
