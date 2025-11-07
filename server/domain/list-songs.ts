@@ -66,6 +66,7 @@ export const listSongs = async (input: Input): Promise<Result> => {
     .selectDistinct()
     .from(videoMetas)
     .innerJoin(channels, eq(videoMetas.channelId, channels.channelId))
+    .orderBy(asc(videoMetas.channelId))
 
   return {
     data: result.map(
