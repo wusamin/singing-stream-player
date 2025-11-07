@@ -57,7 +57,6 @@ export const usePlayer = (songs: Song[]) => {
       if (!v) {
         return
       }
-      console.log(v.video.id)
       loadByUrl(`http://www.youtube.com/v/${v.video.id}?version=3`, v.startAt)
     }
   }
@@ -121,7 +120,6 @@ export const usePlayer = (songs: Song[]) => {
         nowPlaying.value.endAt < currentTime ||
         timeoutHandler.value === null
       ) {
-        console.log('時間外再生検出、次の曲へ移動します')
         return
       }
       timeoutId.value = window.setTimeout(
@@ -251,11 +249,14 @@ export const usePlayer = (songs: Song[]) => {
     }
 
     timeoutHandler.value = () => {
-      if (playlist.value.length - 1 === index) {
+      const nowIndex = playlist.value.findIndex(
+        (p) => p.id === nowPlaying.value?.id,
+      )
+      if (playlist.value.length - 1 === nowIndex) {
         stop()
         return
       }
-      start({ startIndex: index + 1 })
+      start({ startIndex: nowIndex + 1 })
     }
 
     timeoutId.value = window.setTimeout(
