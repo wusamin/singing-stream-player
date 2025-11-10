@@ -9,14 +9,7 @@ export interface Song {
     id: string
     title: string
     publishedAt: Date
-    channel: {
-      id: string
-      displayName: string
-      owner: {
-        displayName: string
-        fanMark: string
-      }
-    }
+    channelId: string
   }
   meta: {
     title: string
@@ -83,14 +76,7 @@ export const listSongs = async (input: Input): Promise<Result> => {
           id: String(row.video_metas.videoId),
           title: String(row.video_metas.title),
           publishedAt: row.video_metas.publishedAt,
-          channel: {
-            id: String(row.video_metas.channelId),
-            displayName: row.channels.displayName,
-            owner: {
-              displayName: row.channels.ownerName,
-              fanMark: row.channels.fanMark || '',
-            },
-          },
+          channelId: String(row.video_metas.channelId),
         },
         meta: {
           title: String(row.songs.metaTitle),

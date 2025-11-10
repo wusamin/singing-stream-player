@@ -36,14 +36,7 @@ type Response = {
       id: string
       title: string
       publishedAt: string
-      channel: {
-        id: string
-        displayName: string
-        owner: {
-          displayName: string
-          fanMark: string
-        }
-      }
+      channelId: string
     }
     meta: {
       title: string
@@ -72,21 +65,33 @@ export const useSongs = async () => {
     channelId: 'unohananonochi',
   })
 
-  const { data, status } = useFetch<Response>('/api/songs', {
-    query: computed(() => ({
-      ...searchCondition.value,
-      channelIds: searchCondition.value?.channelId
-        ? [searchCondition.value.channelId]
-        : undefined,
-    })),
+  // データ件数が少ないうちは、APIのコール回数を減らすために全権取得する
+  const { data, status } = useFetch<Response>('/api/songs')
+
+  const channelsMap = computed(() => {
+    const map: Record<string, Response['channels'][0]> = {}
+    data.value?.channels.forEach((channel) => {
+      map[channel.id] = channel
+    })
+    return map
   })
 
   return {
-    songs: computed((): Song[] =>
-      R.pipe(
+    songs: computed((): Song[] => {
+      return R.pipe(
         data.value?.data ?? [],
-        R.map(
-          (i): Song => ({
+        // 検索条件が増えてきたら切り出した方がいいかも
+        R.filter((i) =>
+          searchCondition.value?.channelId
+            ? i.video.channelId === searchCondition.value.channelId
+            : true,
+        ),
+        R.map((i): Song => {
+          const channel = channelsMap.value[i.video.channelId]
+          if (!channel) {
+            throw new Error(`Channel not found: ${i.video.channelId}`)
+          }
+          return {
             ...i,
             video: {
               ...i.video,
@@ -100,6 +105,7 @@ export const useSongs = async () => {
               thumbnail: {
                 url: `https://img.youtube.com/vi/${i.video.id}/maxresdefault.jpg`,
               },
+              channel,
             },
             duration: ((): string => {
               const d = i.endAt - i.startAt
@@ -107,10 +113,10 @@ export const useSongs = async () => {
               const paddedSeconds = String(seconds).padStart(2, '0')
               return `${Math.floor(d / 60)}:${paddedSeconds}`
             })(),
-          }),
-        ),
-      ),
-    ),
+          }
+        }),
+      )
+    }),
     status,
     searchCondition,
     channels: computed(() => data.value?.channels ?? []),
