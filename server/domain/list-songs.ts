@@ -58,6 +58,7 @@ export const listSongs = async (input: Input): Promise<Result> => {
     .orderBy(
       asc(videoMetas.publishedAt),
       asc(videoMetas.channelId),
+      asc(videoMetas.title),
       asc(songs.startAt),
     )
 
