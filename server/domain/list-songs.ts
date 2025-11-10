@@ -1,4 +1,4 @@
-import { asc, eq, inArray } from 'drizzle-orm'
+import { and, asc, eq, inArray } from 'drizzle-orm'
 import * as R from 'remeda'
 import { db } from '../db'
 import { channels, songs, videoMetas } from '../db/schema'
@@ -51,9 +51,13 @@ export const listSongs = async (input: Input): Promise<Result> => {
     .innerJoin(videoMetas, eq(songs.videoMetaId, videoMetas.id))
     .innerJoin(channels, eq(videoMetas.channelId, channels.channelId))
     .where(
-      input.channelIds
-        ? inArray(videoMetas.channelId, input.channelIds)
-        : undefined,
+      and(
+        input.channelIds
+          ? inArray(videoMetas.channelId, input.channelIds)
+          : undefined,
+        // privateな動画は公開しないほうが良いので、認証されたユーザーのみ閲覧可能にする
+        isAuthenticated() ? undefined : eq(videoMetas.visibility, 'public'),
+      ),
     )
     .orderBy(
       asc(videoMetas.publishedAt),
@@ -62,12 +66,14 @@ export const listSongs = async (input: Input): Promise<Result> => {
       asc(songs.startAt),
     )
 
-  // DBに保有している全チャンネルを取得
-  const allVideoMetas = await db
-    .selectDistinct()
-    .from(videoMetas)
-    .innerJoin(channels, eq(videoMetas.channelId, channels.channelId))
-    .orderBy(asc(videoMetas.channelId))
+  // publicな動画が存在するチャンネルを取得
+  const allChannels = await db
+    .selectDistinct({ channels })
+    .from(channels)
+    .innerJoin(videoMetas, eq(channels.channelId, videoMetas.channelId))
+    // ログイン処理を追加した際に復活させる
+    .where(isAuthenticated() ? undefined : eq(videoMetas.visibility, 'public'))
+    .orderBy(asc(channels.channelId))
 
   return {
     data: result.map(
@@ -95,10 +101,10 @@ export const listSongs = async (input: Input): Promise<Result> => {
       }),
     ),
     channels: R.pipe(
-      allVideoMetas,
+      allChannels,
       R.map(
         (row): Channel => ({
-          id: String(row.video_metas.channelId),
+          id: String(row.channels.channelId),
           displayName: row.channels.displayName,
           owner: {
             displayName: row.channels.ownerName,
@@ -109,4 +115,8 @@ export const listSongs = async (input: Input): Promise<Result> => {
       R.uniqueBy((i) => i.id),
     ),
   }
+}
+
+const isAuthenticated = (): boolean => {
+  return true
 }
