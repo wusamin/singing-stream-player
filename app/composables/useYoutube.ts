@@ -49,10 +49,10 @@ export const useYoutube = (option?: Partial<Option>) => {
               `http://www.youtube.com/v/${option.initialVideoId}?version=3`,
               option?.startSeconds || 0,
             )
-          }, 1000)
+          }, 500)
         }
       }
-    }, 500)
+    }, 100)
   })
 
   const play = () => {
