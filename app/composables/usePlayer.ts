@@ -49,11 +49,15 @@ export const usePlayer = (songs: Song[]) => {
   const playlist = ref<Song[]>(songs)
   // シャッフルに関連して元のデータが必要なため。
   const songsRef = ref<Song[]>(songs)
+  // シャッフル状態を管理
+  const isShuffleEnabled = ref<boolean>(false)
 
   const setPlaylist = async (_playlist: Song[], loadVideo: boolean) => {
-    playlist.value = _playlist
+    songsRef.value = _playlist
+    // シャッフルが有効な場合はシャッフルしたプレイリストをセット
+    playlist.value = isShuffleEnabled.value ? R.shuffle(_playlist) : _playlist
     if (loadVideo) {
-      const v = _playlist[0]
+      const v = playlist.value[0]
       if (!v) {
         return
       }
@@ -184,6 +188,7 @@ export const usePlayer = (songs: Song[]) => {
     })
 
   const shufflePlaylist = () => {
+    isShuffleEnabled.value = true
     if (nowPlaying.value === null) {
       playlist.value = R.shuffle(playlist.value)
       return
@@ -200,6 +205,7 @@ export const usePlayer = (songs: Song[]) => {
   }
 
   const unshufflePlaylist = () => {
+    isShuffleEnabled.value = false
     playlist.value = [...songsRef.value]
   }
 
@@ -225,8 +231,11 @@ export const usePlayer = (songs: Song[]) => {
     const index = option?.startIndex ?? 0
 
     if (option?.playlist) {
-      playlist.value = option.playlist
       songsRef.value = option.playlist
+      // シャッフルが有効な場合はシャッフルしたプレイリストをセット
+      playlist.value = isShuffleEnabled.value
+        ? R.shuffle(option.playlist)
+        : option.playlist
     }
 
     if (playlist.value.length < index - 1) {
