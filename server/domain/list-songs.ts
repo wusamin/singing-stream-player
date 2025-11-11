@@ -35,6 +35,7 @@ interface Result {
 
 interface Input {
   channelIds?: string[]
+  authenticated?: boolean
 }
 
 export const listSongs = async (input: Input): Promise<Result> => {
@@ -49,7 +50,7 @@ export const listSongs = async (input: Input): Promise<Result> => {
           ? inArray(videoMetas.channelId, input.channelIds)
           : undefined,
         // privateな動画は公開しないほうが良いので、認証されたユーザーのみ閲覧可能にする
-        isAuthenticated() ? undefined : eq(videoMetas.visibility, 'public'),
+        input?.authenticated ? undefined : eq(videoMetas.visibility, 'public'),
       ),
     )
     .orderBy(
@@ -65,7 +66,9 @@ export const listSongs = async (input: Input): Promise<Result> => {
     .from(channels)
     .innerJoin(videoMetas, eq(channels.channelId, videoMetas.channelId))
     // ログイン処理を追加した際に復活させる
-    .where(isAuthenticated() ? undefined : eq(videoMetas.visibility, 'public'))
+    .where(
+      input?.authenticated ? undefined : eq(videoMetas.visibility, 'public'),
+    )
     .orderBy(asc(channels.channelId))
 
   return {
