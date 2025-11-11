@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Disclaimer from '~/components/disclaimer.vue'
 import { useModal } from '~/composables'
+import { useSignIn, useSignOut, useUser } from '~/composables/auth'
 
 const props = defineProps<{
   visible: boolean
@@ -12,6 +13,10 @@ const {
   show: showModal,
   dismiss: dismissModal,
 } = useModal()
+
+const { currentUser } = useUser()
+const { signIn } = useSignIn()
+const { signOut } = useSignOut()
 
 // 内部状態: メニューコンテンツが表示中か、非表示アニメーション中か
 const isContentVisible = ref(props.visible)
@@ -54,7 +59,10 @@ const handleDismiss = () => {
               このサイトについて
             </button>
           </li>
-          <li><button>管理者ログイン</button></li>
+          <li v-if="!currentUser">
+            <button @click="signIn">ログイン</button>
+          </li>
+          <li v-else><button @click="signOut">ログアウト</button></li>
         </ul>
       </div>
     </Transition>

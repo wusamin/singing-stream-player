@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { useModal } from '@/composables'
-
 const { songs, status, channels, searchCondition } = await useSongs()
 const {
   start,
