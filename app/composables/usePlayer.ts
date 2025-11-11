@@ -249,9 +249,28 @@ export const usePlayer = (songs: Song[]) => {
       return
     }
 
-    load(song.video.id, song.startAt)
-
-    nowPlaying.value = song
+    // シャッフルが有効で、index > 0の場合、指定された曲を1番目に配置
+    if (isShuffleEnabled.value && index > 0) {
+      playlist.value = [
+        song,
+        ...R.pipe(
+          playlist.value,
+          R.filter((s) => s.id !== song.id),
+          R.shuffle(),
+        ),
+      ]
+      // 1番目に配置したので、index 0で再生
+      const firstSong = playlist.value[0]
+      if (!firstSong) {
+        console.error('first song is undefined')
+        return
+      }
+      load(firstSong.video.id, firstSong.startAt)
+      nowPlaying.value = firstSong
+    } else {
+      load(song.video.id, song.startAt)
+      nowPlaying.value = song
+    }
 
     if (!window) {
       throw new Error('window is undefined')
@@ -270,7 +289,7 @@ export const usePlayer = (songs: Song[]) => {
 
     timeoutId.value = window.setTimeout(
       timeoutHandler.value,
-      (song.endAt - song.startAt) * 1000,
+      (nowPlaying.value.endAt - nowPlaying.value.startAt) * 1000,
     )
   }
 
