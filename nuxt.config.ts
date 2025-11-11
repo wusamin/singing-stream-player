@@ -10,7 +10,7 @@ export default defineNuxtConfig({
     'nuxt-anchorscroll',
   ],
   typescript: {
-    typeCheck: true,
+    typeCheck: process.env.NUXT_TYPESCRIPT_TYPECHECK !== 'false',
     tsConfig: {
       compilerOptions: {
         types: ['@types/youtube'],
