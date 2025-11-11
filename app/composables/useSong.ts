@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import * as R from 'remeda'
+import { useUser } from './auth'
 
 export interface Song {
   id: string
@@ -61,12 +62,30 @@ interface Option {
 }
 
 export const useSongs = async () => {
+  const { currentUser } = useUser()
+
   const searchCondition = ref<Option>({
     channelId: 'unohananonochi',
   })
 
+  watch(currentUser, async () => {
+    if (!currentUser.value) {
+      return
+    }
+    await refresh()
+  })
+
   // データ件数が少ないうちは、APIのコール回数を減らすために全権取得する
-  const { data, status } = useFetch<Response>('/api/songs')
+  const { data, status, refresh } = useFetch<Response>('/api/songs', {
+    server: true,
+    onRequest: async ({ options }) => {
+      if (!currentUser.value) {
+        return
+      }
+      const idToken = await currentUser.value.getIdToken()
+      options.headers.set('Authorization', `Bearer ${idToken}`)
+    },
+  })
 
   const channelsMap = computed(() => {
     const map: Record<string, Response['channels'][0]> = {}

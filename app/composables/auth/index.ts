@@ -2,24 +2,22 @@ import {
   GoogleAuthProvider,
   getAuth,
   getRedirectResult,
-  multiFactor,
   onAuthStateChanged,
   signInWithPopup,
-  signInWithRedirect,
   signOut,
-  TotpMultiFactorGenerator,
   type User,
 } from 'firebase/auth'
 
-export const useUser = async () => {
+export const useUser = () => {
   const currentUser = ref<User | null>(null)
 
-  await getAuth().authStateReady()
-  currentUser.value = getAuth().currentUser
+  // 初期化処理を非同期で実行するが、コンポーザブル自体は同期的に返す
+  getAuth().authStateReady().then(() => {
+    currentUser.value = getAuth().currentUser
+  })
 
   const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
     currentUser.value = user
-    console.log(JSON.stringify(user, null, 2))
   })
 
   onUnmounted(() => {
@@ -37,19 +35,19 @@ export const useSignIn = () => {
     }
     await signInWithPopup(getAuth(), new GoogleAuthProvider())
   }
-  const promise = useUser()
-  // onNuxtReady(async () => {
-  //   const result = await getRedirectResult(getAuth())
-  //   console.log('result', result)
-  //   const { currentUser } = await promise
-  //   console.log('currentUser', currentUser.value)
-  //   // // サインインしていない場合
-  //   if (currentUser.value === null) {
-  //     pending.value = false
-  //     return
-  //   }
-  //   await navigateTo('/')
-  // })
+  const { currentUser } = useUser()
+
+  onNuxtReady(async () => {
+    const result = await getRedirectResult(getAuth())
+    console.log('result', result)
+    console.log('currentUser', currentUser.value)
+    // // サインインしていない場合
+    if (currentUser.value === null) {
+      pending.value = false
+      return
+    }
+    await navigateTo('/')
+  })
   return { signIn, pending }
 }
 
