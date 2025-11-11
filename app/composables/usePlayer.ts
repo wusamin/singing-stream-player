@@ -181,11 +181,13 @@ export const usePlayer = (songs: Song[]) => {
     start({ startIndex: prevIndex })
   }
 
-  const playShuffle = () =>
+  const playShuffle = () => {
+    isShuffleEnabled.value = true
     start({
       startIndex: 0,
       playlist: R.shuffle(playlist.value),
     })
+  }
 
   const shufflePlaylist = () => {
     isShuffleEnabled.value = true
@@ -231,11 +233,8 @@ export const usePlayer = (songs: Song[]) => {
     const index = option?.startIndex ?? 0
 
     if (option?.playlist) {
-      songsRef.value = option.playlist
-      // シャッフルが有効な場合はシャッフルしたプレイリストをセット
-      playlist.value = isShuffleEnabled.value
-        ? R.shuffle(option.playlist)
-        : option.playlist
+      // songsRef.value = option.playlist
+      playlist.value = option.playlist
     }
 
     if (playlist.value.length < index - 1) {
@@ -249,28 +248,8 @@ export const usePlayer = (songs: Song[]) => {
       return
     }
 
-    // シャッフルが有効で、index > 0の場合、指定された曲を1番目に配置
-    if (isShuffleEnabled.value && index > 0) {
-      playlist.value = [
-        song,
-        ...R.pipe(
-          playlist.value,
-          R.filter((s) => s.id !== song.id),
-          R.shuffle(),
-        ),
-      ]
-      // 1番目に配置したので、index 0で再生
-      const firstSong = playlist.value[0]
-      if (!firstSong) {
-        console.error('first song is undefined')
-        return
-      }
-      load(firstSong.video.id, firstSong.startAt)
-      nowPlaying.value = firstSong
-    } else {
-      load(song.video.id, song.startAt)
-      nowPlaying.value = song
-    }
+    load(song.video.id, song.startAt)
+    nowPlaying.value = song
 
     if (!window) {
       throw new Error('window is undefined')
