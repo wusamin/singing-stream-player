@@ -14,8 +14,8 @@ COPY . .
 
 # Nuxtアプリケーションをビルド（型チェックを無効化）
 # Docker環境では型チェックをスキップして高速化
-ENV NUXT_TYPESCRIPT_TYPECHECK=false
-RUN npx nuxt build
+#ENV NUXT_TYPESCRIPT_TYPECHECK=false
+#RUN npx nuxt build
 
 # ---- Production Stage ----
 # 実行用のステージ
