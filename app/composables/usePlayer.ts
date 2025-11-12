@@ -233,7 +233,7 @@ export const usePlayer = (songs: Song[]) => {
     const index = option?.startIndex ?? 0
 
     if (option?.playlist) {
-      // songsRef.value = option.playlist
+      songsRef.value = option.playlist
       playlist.value = option.playlist
     }
 
