@@ -60,7 +60,7 @@ const handleDismiss = () => {
             </button>
           </li>
           <li v-if="!currentUser">
-            <button @click="signIn">ログイン</button>
+            <button @click="signIn">管理者ログイン</button>
           </li>
           <li v-else><button @click="signOut">ログアウト</button></li>
         </ul>

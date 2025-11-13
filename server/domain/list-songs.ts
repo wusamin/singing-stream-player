@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray } from 'drizzle-orm'
 import * as R from 'remeda'
 import { db } from '../db'
 import { channels, songs, videoMetas } from '../db/schema'
@@ -54,7 +54,7 @@ export const listSongs = async (input: Input): Promise<Result> => {
       ),
     )
     .orderBy(
-      asc(videoMetas.publishedAt),
+      desc(videoMetas.publishedAt),
       asc(videoMetas.channelId),
       asc(videoMetas.title),
       asc(songs.startAt),
