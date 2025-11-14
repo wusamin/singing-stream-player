@@ -62,11 +62,28 @@ interface Option {
 }
 
 export const useSongs = async () => {
-  const { currentUser } = useUser()
+  const route = useRoute()
+  const router = useRouter()
 
   const searchCondition = ref<Option>({
-    channelId: 'unohananonochi',
+    channelId: route.query.channelId
+      ? String(route.query.channelId)
+      : 'unohananonochi',
   })
+
+  watch(searchCondition.value, (newVal) => {
+    console.log(
+      JSON.stringify({ newVal, searchCondition: searchCondition.value }),
+    )
+    router.replace({
+      query: {
+        ...route.query,
+        channelId: newVal.channelId,
+      },
+    })
+  })
+
+  const { currentUser } = useUser()
 
   watch(currentUser, async () => {
     if (!currentUser.value) {
@@ -101,7 +118,7 @@ export const useSongs = async () => {
         data.value?.data ?? [],
         // 検索条件が増えてきたら切り出した方がいいかも
         R.filter((i) =>
-          searchCondition.value?.channelId
+          searchCondition.value?.channelId !== 'all-channels'
             ? i.video.channelId === searchCondition.value.channelId
             : true,
         ),

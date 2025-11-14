@@ -33,7 +33,8 @@ const {
           class="channel-selector cursor-pointer focus:border-0 focus:outline-none"
           v-model:="searchCondition.channelId"
         >
-          <option :value="undefined">すべて</option>
+          <!-- 本当は未指定の場合に全てとすべきだが、指定しない場合はののち優先なので全て取得は別途値を設定する -->
+          <option :value="'all-channels'">すべて</option>
           <option
             v-for="channel in channels"
             :key="channel.id"

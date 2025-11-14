@@ -10,7 +10,6 @@ export default defineNuxtConfig({
     'nuxt-anchorscroll',
   ],
   typescript: {
-    typeCheck: process.env.NUXT_TYPESCRIPT_TYPECHECK !== 'false',
     tsConfig: {
       compilerOptions: {
         types: ['@types/youtube'],
@@ -25,7 +24,12 @@ export default defineNuxtConfig({
   app: {
     head: {
       title: 'ののちのお歌プレーヤー',
-      meta: [{ charset: 'utf-8' }],
+      meta: [
+        { charset: 'utf-8' },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:site_name', content: 'ののちのお歌プレーヤー' },
+      ],
+
       htmlAttrs: { lang: 'ja' },
       script: [{ src: 'https://www.youtube.com/iframe_api' }],
       link: [
