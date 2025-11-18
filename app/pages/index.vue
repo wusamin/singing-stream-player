@@ -145,7 +145,10 @@ const {
                     />
                   </th>
                   <th
-                    v-if="!searchCondition.channelId"
+                    v-if="
+                      searchCondition.channelId === undefined ||
+                      searchCondition.channelId === 'all-channels'
+                    "
                     class="w-[140px] playlist-header"
                   ></th>
                   <th class="w-[140px] playlist-header hidden md:table-cell">
@@ -199,7 +202,13 @@ const {
                   <td>
                     {{ song.duration }}
                   </td>
-                  <td v-if="!searchCondition.channelId" class="text-sm">
+                  <td
+                    v-if="
+                      searchCondition.channelId === undefined ||
+                      searchCondition.channelId === 'all-channels'
+                    "
+                    class="text-sm"
+                  >
                     {{ song.video.channel.owner.fanMark }}
                     {{ song.video.channel.owner.displayName }}
                   </td>

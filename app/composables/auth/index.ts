@@ -12,9 +12,11 @@ export const useUser = () => {
   const currentUser = ref<User | null>(null)
 
   // 初期化処理を非同期で実行するが、コンポーザブル自体は同期的に返す
-  getAuth().authStateReady().then(() => {
-    currentUser.value = getAuth().currentUser
-  })
+  getAuth()
+    .authStateReady()
+    .then(() => {
+      currentUser.value = getAuth().currentUser
+    })
 
   const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
     currentUser.value = user
@@ -39,8 +41,6 @@ export const useSignIn = () => {
 
   onNuxtReady(async () => {
     const result = await getRedirectResult(getAuth())
-    console.log('result', result)
-    console.log('currentUser', currentUser.value)
     // // サインインしていない場合
     if (currentUser.value === null) {
       pending.value = false
