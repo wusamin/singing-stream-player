@@ -33,18 +33,19 @@ export interface Song {
 type Response = {
   data: {
     id: string
-    video: {
-      id: string
-      title: string
-      publishedAt: string
-      channelId: string
-    }
+    videoId: string
     meta: {
       title: string
       artist: string
     }
     startAt: number
     endAt: number
+  }[]
+  videos: {
+    id: string
+    title: string
+    publishedAt: string
+    channelId: string
   }[]
   channels: {
     id: string
@@ -112,10 +113,25 @@ export const useSongs = async () => {
     return map
   })
 
+  const videosMap = computed(() => {
+    const map: Record<string, Response['videos'][0]> = {}
+    data.value?.videos.forEach((video) => {
+      map[video.id] = video
+    })
+    return map
+  })
+
   return {
     songs: computed((): Song[] => {
       return R.pipe(
         data.value?.data ?? [],
+        R.map((song) => {
+          const video = videosMap.value[song.videoId]
+          if (!video) {
+            throw new Error(`Video not found: ${song.videoId}`)
+          }
+          return { ...song, video }
+        }),
         // 検索条件が増えてきたら切り出した方がいいかも
         R.filter((i) =>
           searchCondition.value?.channelId !== 'all-channels'

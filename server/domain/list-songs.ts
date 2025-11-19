@@ -5,18 +5,20 @@ import { channels, songs, videoMetas } from '../db/schema'
 
 export interface Song {
   id: string
-  video: {
-    id: string
-    title: string
-    publishedAt: Date
-    channelId: string
-  }
+  videoId: string
   meta: {
     title: string
     artist: string
   }
   startAt: number
   endAt: number
+}
+
+export interface Video {
+  id: string
+  title: string
+  publishedAt: Date
+  channelId: string
 }
 
 export interface Channel {
@@ -30,6 +32,7 @@ export interface Channel {
 
 interface Result {
   data: Song[]
+  videos: Video[]
   channels: Channel[]
 }
 
@@ -71,16 +74,24 @@ export const listSongs = async (input: Input): Promise<Result> => {
     )
     .orderBy(asc(channels.channelId))
 
+  const videos = R.pipe(
+    result,
+    R.map(
+      (row): Video => ({
+        id: String(row.video_metas.videoId),
+        title: String(row.video_metas.title),
+        publishedAt: row.video_metas.publishedAt,
+        channelId: String(row.video_metas.channelId),
+      }),
+    ),
+    R.uniqueBy((i) => i.id),
+  )
+
   return {
     data: result.map(
       (row): Song => ({
         id: row.songs.id,
-        video: {
-          id: String(row.video_metas.videoId),
-          title: String(row.video_metas.title),
-          publishedAt: row.video_metas.publishedAt,
-          channelId: String(row.video_metas.channelId),
-        },
+        videoId: String(row.video_metas.videoId),
         meta: {
           title: String(row.songs.metaTitle),
           artist: String(row.songs.metaArtist),
@@ -89,6 +100,7 @@ export const listSongs = async (input: Input): Promise<Result> => {
         endAt: row.songs.endAt ?? 0,
       }),
     ),
+    videos,
     channels: R.pipe(
       allChannels,
       R.map(
