@@ -71,17 +71,17 @@ export const useSongs = async () => {
       : 'unohananonochi',
   })
 
-  watch(searchCondition.value, (newVal) => {
-    console.log(
-      JSON.stringify({ newVal, searchCondition: searchCondition.value }),
-    )
-    router.replace({
-      query: {
-        ...route.query,
-        channelId: newVal.channelId,
-      },
-    })
-  })
+  watch(
+    () => searchCondition.value.channelId,
+    (newChannelId) => {
+      router.replace({
+        query: {
+          ...route.query,
+          channelId: newChannelId,
+        },
+      })
+    },
+  )
 
   const { currentUser } = useUser()
 
