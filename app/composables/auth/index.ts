@@ -30,6 +30,8 @@ export const useUser = () => {
 }
 
 export const useSignIn = () => {
+  const route = useRoute()
+  const { currentUser } = useUser()
   const pending = ref<boolean>(false)
   const signIn = async () => {
     if (pending.value) {
@@ -37,7 +39,6 @@ export const useSignIn = () => {
     }
     await signInWithPopup(getAuth(), new GoogleAuthProvider())
   }
-  const { currentUser } = useUser()
 
   onNuxtReady(async () => {
     const result = await getRedirectResult(getAuth())
@@ -46,7 +47,10 @@ export const useSignIn = () => {
       pending.value = false
       return
     }
-    await navigateTo('/')
+    await navigateTo({
+      path: '/',
+      query: route.query,
+    })
   })
   return { signIn, pending }
 }
