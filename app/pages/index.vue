@@ -14,6 +14,7 @@ const {
   shufflePlaylist,
   unshufflePlaylist,
   isShuffled,
+  requestPictureInPicture,
 } = usePlayer(songs.value)
 const {
   visible: visibleMenu,
@@ -274,9 +275,19 @@ const {
             />
           </button>
         </div>
-        <div class="flex items-center w-[140px]">
+        <div class="flex items-center w-[140px] gap-4">
           <button @click="playShuffle" class="w-[24px] h-[24px]">
             <Icon name="ix:random" class="w-full h-full hover:scale-[1.15]" />
+          </button>
+          <button
+            @click="requestPictureInPicture"
+            class="w-[24px] h-[24px]"
+            title="Picture-in-Picture"
+          >
+            <Icon
+              name="material-symbols:picture-in-picture-alt"
+              class="w-full h-full hover:scale-[1.15]"
+            />
           </button>
         </div>
       </div>

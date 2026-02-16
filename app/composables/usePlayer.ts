@@ -272,6 +272,122 @@ export const usePlayer = (songs: Song[]) => {
     )
   }
 
+  // PiP用のCanvas/Video要素（遅延初期化）
+  let pipVideo: HTMLVideoElement | null = null
+  let pipCanvas: HTMLCanvasElement | null = null
+
+  const drawPipCanvas = () => {
+    if (!pipCanvas) return
+    const ctx = pipCanvas.getContext('2d')
+    if (!ctx) return
+
+    const w = pipCanvas.width
+    const h = pipCanvas.height
+    const song = nowPlaying.value
+
+    // 背景
+    ctx.fillStyle = '#1e1e2e'
+    ctx.fillRect(0, 0, w, h)
+
+    // アクセントバー
+    ctx.fillStyle = '#d86b98'
+    ctx.fillRect(0, 0, w, 3)
+
+    if (!song) {
+      ctx.fillStyle = '#888888'
+      ctx.font = '20px sans-serif'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText('再生中の曲はありません', w / 2, h / 2)
+      return
+    }
+
+    // 曲名
+    ctx.fillStyle = '#ffffff'
+    ctx.font = 'bold 24px "Noto Sans JP", sans-serif'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(song.meta.title, w / 2, h / 2 - 16, w - 32)
+
+    // アーティスト
+    ctx.fillStyle = '#a0a0b0'
+    ctx.font = '18px "Noto Sans JP", sans-serif'
+    ctx.fillText(song.meta.artist, w / 2, h / 2 + 16, w - 32)
+  }
+
+  const setupMediaSession = () => {
+    if (!('mediaSession' in navigator) || !nowPlaying.value) return
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: nowPlaying.value.meta.title,
+      artist: nowPlaying.value.meta.artist,
+    })
+    navigator.mediaSession.setActionHandler('play', () => {
+      if (state.value !== 'PLAYING') pause()
+    })
+    navigator.mediaSession.setActionHandler('pause', () => {
+      if (state.value === 'PLAYING') pause()
+    })
+    navigator.mediaSession.setActionHandler('nexttrack', () => next())
+    navigator.mediaSession.setActionHandler('previoustrack', () => prev())
+  }
+
+  const requestPictureInPicture = async () => {
+    if (!document.pictureInPictureEnabled) {
+      console.warn('PiP is not supported in this browser')
+      return
+    }
+
+    // PiP中なら解除
+    if (document.pictureInPictureElement) {
+      await document.exitPictureInPicture()
+      return
+    }
+
+    // Canvas作成
+    if (!pipCanvas) {
+      pipCanvas = document.createElement('canvas')
+      pipCanvas.width = 400
+      pipCanvas.height = 225
+    }
+    drawPipCanvas()
+
+    // Video作成（DOMに追加して非表示にする）
+    if (!pipVideo) {
+      pipVideo = document.createElement('video')
+      pipVideo.muted = true
+      pipVideo.playsInline = true
+      pipVideo.style.cssText =
+        'position:fixed;opacity:0;pointer-events:none;width:1px;height:1px;top:0;left:0;'
+      document.body.appendChild(pipVideo)
+
+      pipVideo.addEventListener('leavepictureinpicture', () => {
+        pipVideo?.pause()
+      })
+    }
+
+    const stream = pipCanvas.captureStream(1)
+    pipVideo.srcObject = stream
+    await pipVideo.play()
+
+    try {
+      await pipVideo.requestPictureInPicture()
+    } catch (e) {
+      console.error('PiP request failed:', e)
+      return
+    }
+
+    setupMediaSession()
+  }
+
+  // 曲が変わったらPiPのCanvasとMediaSessionを更新
+  watch(nowPlaying, () => {
+    if (document.pictureInPictureElement) {
+      drawPipCanvas()
+      setupMediaSession()
+    }
+  })
+
   return {
     start,
     next,
@@ -287,5 +403,6 @@ export const usePlayer = (songs: Song[]) => {
     isShuffled,
     shufflePlaylist,
     unshufflePlaylist,
+    requestPictureInPicture,
   }
 }
