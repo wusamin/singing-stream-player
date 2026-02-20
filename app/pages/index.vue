@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useUser } from '~/composables/auth'
+
+const { currentUser } = useUser()
 const { songs, status, channels, searchCondition } = await useSongs()
 const {
   start,
@@ -280,6 +283,7 @@ const {
             <Icon name="ix:random" class="w-full h-full hover:scale-[1.15]" />
           </button>
           <button
+            v-if="currentUser"
             @click="requestPictureInPicture"
             class="w-[24px] h-[24px]"
             title="Picture-in-Picture"
